@@ -11,7 +11,9 @@ import android.view.MenuItem;
 
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.fragments.AtmListFragment;
+import com.cdvdev.atmsearcher.fragments.NetworkOffFragment;
 import com.cdvdev.atmsearcher.helpers.FragmentsHelper;
+import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,7 +30,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mFm = getSupportFragmentManager();
-        FragmentsHelper.createFragment(mFm, AtmListFragment.newInstance(), false);
+
+        Fragment newFragment = null;
+
+        if (NetworkHelper.isDeviceOnline(getApplicationContext())) {
+             newFragment =  AtmListFragment.newInstance();
+        } else {
+             newFragment = NetworkOffFragment.newInstance();
+        }
+
+        FragmentsHelper.createFragment(mFm, newFragment, false);
     }
 
     @Override
