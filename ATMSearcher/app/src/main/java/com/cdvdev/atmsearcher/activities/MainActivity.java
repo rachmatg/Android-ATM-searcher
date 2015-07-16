@@ -1,12 +1,21 @@
-package com.cdvdev.atmsearcher;
+package com.cdvdev.atmsearcher.activities;
 
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.cdvdev.atmsearcher.R;
+import com.cdvdev.atmsearcher.fragments.AtmListFragment;
+import com.cdvdev.atmsearcher.helpers.FragmentsHelper;
+
 public class MainActivity extends AppCompatActivity {
+
+    private FragmentManager mFm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,6 +26,9 @@ public class MainActivity extends AppCompatActivity {
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
+
+        mFm = getSupportFragmentManager();
+        FragmentsHelper.createFragment(mFm, AtmListFragment.newInstance(), false);
     }
 
     @Override
