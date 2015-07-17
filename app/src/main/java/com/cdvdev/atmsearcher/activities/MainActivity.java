@@ -1,6 +1,5 @@
 package com.cdvdev.atmsearcher.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -79,13 +78,17 @@ public class MainActivity extends AppCompatActivity {
     private void createUpdateService(){
 
         //creating receiver for service
-        UpdateDataReceiver receiver = new UpdateDataReceiver(new Handler());
+        final UpdateDataReceiver receiver = new UpdateDataReceiver(new Handler());
         receiver.setReceiverCallback(new UpdateDataReceiver.ReceiverCallback(){
             @Override
             public void onReceiverResult(int resultCode, Bundle data) {
-                if (resultCode == Activity.RESULT_OK) {
-                    Toast.makeText(MainActivity.this, data.getString(UpdateDataService.KEY_VALUE), Toast.LENGTH_LONG).show();
+                if (resultCode == NetworkHelper.SUCCESS_RESP_CODE) {
+                    Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.success_update) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.failed_update) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
                 }
+                //TODO: stop update indicator in toolbar
+                //....
             }
         });
 

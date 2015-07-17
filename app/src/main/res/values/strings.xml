@@ -5,4 +5,6 @@
     <string name="action_settings">Settings</string>
     <string name="network_off">Включить WiFi или мобильный интернет</string>
     <string name="button_repeat">Повторить</string>
+    <string name="failed_update">Ошибка при обновлении</string>
+    <string name="success_update">Обновление завершено</string>
 </resources>
