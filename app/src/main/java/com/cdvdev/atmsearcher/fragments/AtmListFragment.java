@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import android.view.ViewGroup;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.adapters.AtmListAdapter;
 import com.cdvdev.atmsearcher.helpers.DebugHelper;
-import com.cdvdev.atmsearcher.loaders.NetworkLoaderManager;
 
 /**
  * Fragment for creating list of ATMS
@@ -33,13 +31,14 @@ public class AtmListFragment extends Fragment{
         super.onCreate(savedInstanceState);
 
         //initialized loader
+        /*
         mNetworkLoader = getLoaderManager().initLoader(
                 LOADER_ID,
                 null,
                 new NetworkLoaderManager(getActivity())
         );
         mNetworkLoader.forceLoad();
-
+        */
 
     }
 
@@ -58,9 +57,9 @@ public class AtmListFragment extends Fragment{
         atmList.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         //starting load from network
-        if (mNetworkLoader.isStarted()) {
+      /*  if (mNetworkLoader.isStarted()) {
             Log.d("DEBUG", "network loader is started!");
-        }
+        }*/
 
         return view;
     }

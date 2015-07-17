@@ -1,6 +1,8 @@
 package com.cdvdev.atmsearcher.activities;
 
-import android.support.v4.app.FragmentTransaction;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -8,12 +10,15 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.fragments.AtmListFragment;
 import com.cdvdev.atmsearcher.fragments.NetworkOffFragment;
 import com.cdvdev.atmsearcher.helpers.FragmentsHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
+import com.cdvdev.atmsearcher.receivers.UpdateDataReceiver;
+import com.cdvdev.atmsearcher.services.UpdateDataService;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mFm = getSupportFragmentManager();
-
         Fragment newFragment = null;
 
         if (NetworkHelper.isDeviceOnline(getApplicationContext())) {
@@ -40,6 +44,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         FragmentsHelper.createFragment(mFm, newFragment, false);
+
+        //start service for download data from network and update into DB
+        createUpdateService();
+
     }
 
     @Override
@@ -62,6 +70,29 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    /**
+     * Method for creating service for download data from network and update into DB
+     */
+    private void createUpdateService(){
+
+        //creating receiver for service
+        UpdateDataReceiver receiver = new UpdateDataReceiver(new Handler());
+        receiver.setReceiverCallback(new UpdateDataReceiver.ReceiverCallback(){
+            @Override
+            public void onReceiverResult(int resultCode, Bundle data) {
+                if (resultCode == Activity.RESULT_OK) {
+                    Toast.makeText(MainActivity.this, data.getString(UpdateDataService.KEY_VALUE), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        //create service
+        Intent intent = new Intent(this, UpdateDataService.class);
+        intent.putExtra(UpdateDataService.KEY_RECEIVER_NAME, receiver);
+        startService(intent);
     }
 
 }
