@@ -11,6 +11,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
 import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 import com.cdvdev.atmsearcher.models.Atm;
@@ -50,7 +51,13 @@ public class UpdateDataService extends IntentService {
                             //get atms
                             ArrayList<Atm> atms = JsonParseHelper.getAtmsList(jsonObject);
 
-                            //TODO: insert into DB
+                            //save into DB
+                            try {
+                                DatabaseHelper db = new DatabaseHelper(getApplicationContext());
+                                db.insertOrUpdateAtms(atms);
+                            } catch (Exception e) {
+                                resultReceiver.send(NetworkHelper.FAILED_RESP_CODE, null);
+                            }
 
                         }
 
