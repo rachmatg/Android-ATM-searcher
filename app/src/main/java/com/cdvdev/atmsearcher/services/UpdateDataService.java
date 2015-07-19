@@ -11,10 +11,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
-
-import org.json.JSONException;
+import com.cdvdev.atmsearcher.models.Atm;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * Service for getting data from server and inserted it to DB
@@ -41,24 +43,17 @@ public class UpdateDataService extends IntentService {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
 
-                        int respCode = -1;
-
-                        try{
-                            respCode = jsonObject.getInt(NetworkHelper.KEY_RESP_CODE);
-                        } catch (JSONException e) {
-                            Log.e("ERROR", e.getMessage());
-                        }
+                        int respCode = JsonParseHelper.getRespCode(jsonObject);
 
                         //if response success , parse Json and update DB
                         if (respCode == NetworkHelper.SUCCESS_RESP_CODE) {
-                            //TODO: parse JSON and update DB
-                            //...
+                            //get atms
+                            ArrayList<Atm> atms = JsonParseHelper.getAtmsList(jsonObject);
+
+                            //TODO: insert into DB
+
                         }
 
-                        /*
-                        Bundle bundle = new Bundle();
-                        bundle.putString(KEY_RESP_CODE, result);
-                        */
                         resultReceiver.send(respCode, null);
                     }
                 },
