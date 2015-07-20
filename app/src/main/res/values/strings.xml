@@ -7,4 +7,8 @@
     <string name="button_repeat">Повторить</string>
     <string name="failed_update">Ошибка при обновлении</string>
     <string name="success_update">Обновление завершено</string>
+
+    <!-- icons -->
+    <string name="ic_place_description">Показать на карте</string>
+    <string name="ic_info_description">Показать дополнительную информацию</string>
 </resources>

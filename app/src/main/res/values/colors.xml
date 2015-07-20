@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- main colors -->
     <item name="primary" type="color">#46B19B</item>
     <item name="primary_dark" type="color">#24A389</item>
     <item name="primary_light" type="color">#68BFAD</item>

@@ -1,12 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/AtmListItem">
 
-    <TextView
-        android:id="@+id/atm_name"
+    <ImageView
+        android:id="@+id/ic_place"
+        style="@style/AtmListItem.Icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="@string/ic_place_description"
+        android:src="@drawable/ic_place_black_24dp"
+        />
+
+    <FrameLayout
+        android:id="@+id/ic_info_container"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true">
 
-</LinearLayout>
+        <ImageView
+            android:id="@+id/ic_info"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@string/ic_info_description"
+            android:src="@drawable/ic_info_black_18dp"
+            style="@style/AtmListItem.Icon"
+            />
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/text_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="72dp"
+        android:layout_marginStart="72dp"
+        android:layout_toLeftOf="@+id/ic_info_container"
+        android:layout_toStartOf="@+id/ic_info_container"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/atm_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ул. Героев Гражданской войны, Днепропетровск"
+            android:paddingTop="16dp"
+            style="@style/AtmListItem.TextPrimary"
+            />
+
+        <TextView
+            android:id="@+id/atm_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ATM001"
+            style="@style/AtmListItem.TextSecondary"
+            />
+
+        <TextView
+            android:id="@+id/atm_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5 км"
+            style="@style/AtmListItem.TextSecondary"
+            />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        android:layout_alignParentBottom="true"
+        />
+
+</RelativeLayout>
