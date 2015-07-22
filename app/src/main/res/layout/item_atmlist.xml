@@ -3,14 +3,19 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/AtmListItem">
 
-    <ImageView
-        android:id="@+id/ic_place"
-        style="@style/AtmListItem.Icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:contentDescription="@string/ic_place_description"
-        android:src="@drawable/ic_place_black_24dp"
-        />
+    <FrameLayout
+        android:id="@+id/ic_place_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/ic_place_description"
+            android:src="@drawable/ic_place_black_24dp"
+            style="@style/AtmListItem.Icon"
+            />
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/ic_info_container"
@@ -43,7 +48,6 @@
             android:id="@+id/atm_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ул. Героев Гражданской войны, Днепропетровск"
             android:paddingTop="16dp"
             style="@style/AtmListItem.TextPrimary"
             />
@@ -52,7 +56,6 @@
             android:id="@+id/atm_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ATM001"
             style="@style/AtmListItem.TextSecondary"
             />
 
@@ -60,7 +63,6 @@
             android:id="@+id/atm_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="5 км"
             style="@style/AtmListItem.TextSecondary"
             />
     </LinearLayout>

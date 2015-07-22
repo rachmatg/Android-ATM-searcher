@@ -134,4 +134,89 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return records > 0;
     }
+
+    /**
+     * Method for getting all ATMSs from DB
+     *
+     * @return ArrayList
+     */
+    public ArrayList<Atm> getAllAtms() {
+        ArrayList<Atm> atms = new ArrayList<>();
+        Atm atm;
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = getAtmsCursor();
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    atm = new Atm();
+                    atm.setName(getStringFieldValue(cursor, COLUMN_ATM_NAME));
+                    atm.setCountry(getStringFieldValue(cursor, COLUMN_ATM_COUNTRY));
+                    atm.setCityId(getIntFieldValue(cursor, COLUMN_ATM_CITY_ID));
+                    atm.setCity(getStringFieldValue(cursor, COLUMN_ATM_CITY));
+                    atm.setAddress(getStringFieldValue(cursor, COLUMN_ATM_ADDRESS));
+                    atm.setWorktime(getStringFieldValue(cursor, COLUMN_ATM_WORKTIME));
+                    atm.setLatitude(getDoubleFieldValue(cursor, COLUMN_ATM_LATITUDE));
+                    atm.setLongitude(getDoubleFieldValue(cursor, COLUMN_ATM_LONGITUDE));
+                    atms.add(atm);
+                } while (cursor.moveToNext());
+            }
+        }
+
+        db.close();
+
+        return atms;
+    }
+
+    /**
+     * Method for getting ATMs
+     *
+     * @return Cursor
+     */
+    private Cursor getAtmsCursor() {
+
+        return getReadableDatabase().query(
+                TABLE_ATMS,
+                null,
+                COLUMN_ATM_LATITUDE + " > 0 AND " + COLUMN_ATM_LONGITUDE + " > 0", //where
+                null, //where args
+                null, //group by
+                null, //having
+                COLUMN_ATM_NAME + " ASC" //order by
+        );
+    }
+
+    /**
+     * Helper method for getting field value
+     *
+     * @param cursor     Cursor
+     * @param columnName String
+     * @return String
+     */
+    private String getStringFieldValue(Cursor cursor, String columnName) {
+        return cursor.getString(cursor.getColumnIndexOrThrow(columnName));
+    }
+
+    /**
+     * Helper method for getting field value
+     *
+     * @param cursor     Cursor
+     * @param columnName String
+     * @return Integer
+     */
+    private int getIntFieldValue(Cursor cursor, String columnName) {
+        return cursor.getInt(cursor.getColumnIndexOrThrow(columnName));
+    }
+
+    /**
+     * Helper method for getting field value
+     *
+     * @param cursor     Cursor
+     * @param columnName String
+     * @return Double
+     */
+    private double getDoubleFieldValue(Cursor cursor, String columnName) {
+        return cursor.getDouble(cursor.getColumnIndexOrThrow(columnName));
+    }
 }

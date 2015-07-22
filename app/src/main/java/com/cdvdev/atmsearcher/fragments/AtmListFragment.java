@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.adapters.AtmListAdapter;
+import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
 import com.cdvdev.atmsearcher.helpers.DebugHelper;
 
 /**
@@ -34,8 +35,12 @@ public class AtmListFragment extends Fragment{
 
         RecyclerView atmList = (RecyclerView) view.findViewById(R.id.atm_list);
 
+
         //setup recycler view adapter
-        AtmListAdapter adapter = new AtmListAdapter(getActivity().getBaseContext(), DebugHelper.getDemoAtmList());
+        AtmListAdapter adapter = new AtmListAdapter(
+                getActivity(),
+                new DatabaseHelper(getActivity()).getAllAtms()
+        );
         atmList.setAdapter(adapter);
 
         //setup items position
