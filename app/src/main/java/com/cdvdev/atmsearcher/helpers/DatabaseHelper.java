@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.cdvdev.atmsearcher.models.Atm;
+import com.cdvdev.atmsearcher.models.LocationPoint;
 
 import java.util.ArrayList;
 
@@ -83,8 +84,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cv.put(COLUMN_ATM_CITY, atm.getCity());
             cv.put(COLUMN_ATM_ADDRESS, atm.getAddress());
             cv.put(COLUMN_ATM_WORKTIME, atm.getWorktime());
-            cv.put(COLUMN_ATM_LATITUDE, atm.getLatitude());
-            cv.put(COLUMN_ATM_LONGITUDE, atm.getLongitude());
+            cv.put(COLUMN_ATM_LATITUDE, atm.getLocation().getLatitude());
+            cv.put(COLUMN_ATM_LONGITUDE, atm.getLocation().getLongitude());
 
             if (isAtmRecordExist(atm)) {
                 db.update(
@@ -157,8 +158,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     atm.setCity(getStringFieldValue(cursor, COLUMN_ATM_CITY));
                     atm.setAddress(getStringFieldValue(cursor, COLUMN_ATM_ADDRESS));
                     atm.setWorktime(getStringFieldValue(cursor, COLUMN_ATM_WORKTIME));
-                    atm.setLatitude(getDoubleFieldValue(cursor, COLUMN_ATM_LATITUDE));
-                    atm.setLongitude(getDoubleFieldValue(cursor, COLUMN_ATM_LONGITUDE));
+                    atm.setLocation(new LocationPoint(
+                            getDoubleFieldValue(cursor, COLUMN_ATM_LATITUDE),
+                            getDoubleFieldValue(cursor, COLUMN_ATM_LONGITUDE)
+                    ));
                     atms.add(atm);
                 } while (cursor.moveToNext());
             }

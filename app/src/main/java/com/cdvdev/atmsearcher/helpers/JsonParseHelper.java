@@ -1,6 +1,7 @@
 package com.cdvdev.atmsearcher.helpers;
 
 import com.cdvdev.atmsearcher.models.Atm;
+import com.cdvdev.atmsearcher.models.LocationPoint;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,8 +50,10 @@ public class JsonParseHelper {
                 atm.setWorktime(atmJsonObject.getString(KEY_ATM_WORKTIME));
                 latitude = atmJsonObject.getString(KEY_ATM_LATITUDE);
                 longitude = atmJsonObject.getString(KEY_ATM_LONGITUDE);
-                atm.setLatitude( latitude.equals("") ? 0 : Double.parseDouble(latitude) );
-                atm.setLongitude( longitude.equals("") ? 0 : Double.parseDouble(longitude) );
+                atm.setLocation(new LocationPoint(
+                        latitude.equals("") ? 0 : Double.parseDouble(latitude),
+                        longitude.equals("") ? 0 : Double.parseDouble(longitude)
+                ));
                 atms.add(atm);
 
             }

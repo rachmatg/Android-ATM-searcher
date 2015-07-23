@@ -10,8 +10,8 @@ public class Atm {
     private String city;
     private String address;
     private String worktime;
-    private double latitude;
-    private double longitude;
+    private LocationPoint location;
+    private double distance;
 
     public String getName() {
         return name;
@@ -61,19 +61,19 @@ public class Atm {
         this.worktime = worktime;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public LocationPoint getLocation() {
+        return location;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void setLocation(LocationPoint location) {
+        this.location = location;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public double getDistance() {
+        return distance;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setDistance(double distance) {
+        this.distance = distance;
     }
 }

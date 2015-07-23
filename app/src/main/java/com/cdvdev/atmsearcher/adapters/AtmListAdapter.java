@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,14 +47,14 @@ public class AtmListAdapter extends RecyclerView.Adapter<AtmListAdapter.ViewHold
         final Atm atm = mAtms.get(i);
         viewHolder.mAtmName.setText(atm.getName());
         viewHolder.mAtmAddress.setText(atm.getAddress() + ", " + atm.getCity());
-        viewHolder.mAtmDistance.setText("0 км");
+        viewHolder.mAtmDistance.setText(atm.getDistance() + " км");
 
         viewHolder.mShowPlace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                double lat = atm.getLatitude();
-                double lon = atm.getLongitude();
+                double lat = atm.getLocation().getLatitude();
+                double lon = atm.getLocation().getLongitude();
 
                 Toast.makeText(mContext, "Lat " + lat + " Lon " + lon, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent();

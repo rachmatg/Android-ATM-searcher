@@ -12,12 +12,19 @@ import android.view.ViewGroup;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.adapters.AtmListAdapter;
 import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
-import com.cdvdev.atmsearcher.helpers.DebugHelper;
+import com.cdvdev.atmsearcher.helpers.Utils;
+import com.cdvdev.atmsearcher.models.Atm;
+import com.cdvdev.atmsearcher.models.LocationPoint;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Fragment for creating list of ATMS
  */
 public class AtmListFragment extends Fragment{
+
+    private ArrayList<Atm> mAtmArrayList;
 
     public static Fragment newInstance(){
         return new AtmListFragment();
@@ -35,11 +42,20 @@ public class AtmListFragment extends Fragment{
 
         RecyclerView atmList = (RecyclerView) view.findViewById(R.id.atm_list);
 
+        //current location
+        LocationPoint currentLocation = new LocationPoint(48.462468, 35.036538);
+        //get ATMs list from DB
+        mAtmArrayList = new DatabaseHelper(getActivity()).getAllAtms();
+        //calculate and set distance for each ATM
+        mAtmArrayList = Utils.addDistanceToAtms(mAtmArrayList, currentLocation);
+        //sorted ArrayList by distance
+        Collections.sort(mAtmArrayList, new Utils.LocationComparator());
+
 
         //setup recycler view adapter
         AtmListAdapter adapter = new AtmListAdapter(
                 getActivity(),
-                new DatabaseHelper(getActivity()).getAllAtms()
+                mAtmArrayList
         );
         atmList.setAdapter(adapter);
 
