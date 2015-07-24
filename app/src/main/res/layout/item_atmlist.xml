@@ -11,7 +11,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/ic_place_description"
+            android:contentDescription="@string/image_description_place"
             android:src="@drawable/ic_place_black_24dp"
             style="@style/AtmListItem.Icon"
             />
@@ -28,7 +28,7 @@
             android:id="@+id/ic_info"
             android:layout_width="18dp"
             android:layout_height="18dp"
-            android:contentDescription="@string/ic_info_description"
+            android:contentDescription="@string/image_description_info"
             android:src="@drawable/ic_info_black_18dp"
             style="@style/AtmListItem.Icon"
             />

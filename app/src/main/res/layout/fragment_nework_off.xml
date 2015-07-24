@@ -13,14 +13,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_no_internet_black_48dp"
-        android:contentDescription="@string/network_off"/>
+        android:contentDescription="@string/message_network_off"/>
 
     <TextView
         android:id="@+id/tv_netework_off"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/network_off"
-        android:textSize="16dp"
+        android:text="@string/message_network_off"
+        android:textSize="16sp"
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
         android:gravity="center"/>
@@ -31,7 +31,7 @@
         android:gravity="center_vertical|center_horizontal">
 
         <Button
-            android:text="@string/button_repeat"
+            android:text="@string/button_text_repeat"
             style="@style/ButtonStyle"/>
     </RelativeLayout>
 

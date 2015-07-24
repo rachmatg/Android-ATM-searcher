@@ -83,9 +83,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onReceiverResult(int resultCode, Bundle data) {
                 if (resultCode == NetworkHelper.SUCCESS_RESP_CODE) {
-                    Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.success_update) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.message_update_success) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.failed_update) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.message_update_failed) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
                 }
                 //TODO: stop update indicator in toolbar
                 //....

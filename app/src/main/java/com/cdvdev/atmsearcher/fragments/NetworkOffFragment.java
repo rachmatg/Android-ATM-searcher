@@ -10,8 +10,6 @@ import android.view.ViewGroup;
 
 import com.cdvdev.atmsearcher.R;
 
-import java.util.zip.Inflater;
-
 public class NetworkOffFragment extends Fragment {
 
     public static Fragment newInstance(){
@@ -21,6 +19,6 @@ public class NetworkOffFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_neworkoff, container, false);
+        return inflater.inflate(R.layout.fragment_nework_off, container, false);
     }
 }
