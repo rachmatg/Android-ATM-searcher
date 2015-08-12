@@ -6,6 +6,8 @@
     <string name="message_update_failed">Ошибка при обновлении</string>
     <string name="message_update_success">Обновление завершено</string>
     <string name="button_text_repeat">Повторить</string>
+    <string name="kilometers">км</string>
+    
 
     <!-- icons -->
     <string name="image_description_place">Показать на карте</string>

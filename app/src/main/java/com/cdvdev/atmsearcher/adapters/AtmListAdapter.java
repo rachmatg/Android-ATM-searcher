@@ -1,12 +1,12 @@
 package com.cdvdev.atmsearcher.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,72 +19,58 @@ import java.util.ArrayList;
 /**
  * Adapter for Atm list
  */
-public class AtmListAdapter extends RecyclerView.Adapter<AtmListAdapter.ViewHolder> {
+public class AtmListAdapter extends ArrayAdapter<Atm> {
 
     private Context mContext;
-    private ArrayList<Atm> mAtms;
 
-    public AtmListAdapter(Context context, ArrayList<Atm> atms){
-       mContext = context;
-       mAtms = atms;
-
-       //TODO: list need to be sorted by distance from current location
-        //....
-        //..
+    public AtmListAdapter(Context context, ArrayList<Atm> atms) {
+        super(context, 0, atms);
+        mContext = context;
     }
+
 
     @Override
-    public AtmListAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public View getView(int position, View convertView, ViewGroup parent) {
 
-        //inflate view for list item
-        View itemView = LayoutInflater.from(mContext).inflate(R.layout.item_atmlist, viewGroup, false);
-
-        return new AtmListAdapter.ViewHolder(itemView);
-    }
-
-    @Override
-    public void onBindViewHolder(AtmListAdapter.ViewHolder viewHolder, int i) {
-        final Atm atm = mAtms.get(i);
-        viewHolder.mAtmName.setText(atm.getName());
-        viewHolder.mAtmAddress.setText(atm.getAddress() + ", " + atm.getCity());
-        viewHolder.mAtmDistance.setText(atm.getDistance() + " км");
-
-        viewHolder.mShowPlace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                double lat = atm.getLocation().getLatitude();
-                double lon = atm.getLocation().getLongitude();
-
-                Toast.makeText(mContext, "Lat " + lat + " Lon " + lon, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("geo:" + lat + "," + lon + "?q=" + lat + "," + lon + "(" + atm.getName() + ")"));
-                mContext.startActivity(intent);
-
-            }
-        });
-    }
-
-    @Override
-    public int getItemCount() {
-        return mAtms.size();
-    }
-
-    /**
-     * ViewHolder for RecyclerView
-     */
-    public static class ViewHolder extends RecyclerView.ViewHolder{
-
-        public TextView mAtmName, mAtmAddress, mAtmDistance;
-        public FrameLayout mShowPlace;
-
-        public ViewHolder(View itemView){
-            super(itemView);
-            mAtmName = (TextView) itemView.findViewById(R.id.atm_name);
-            mAtmAddress = (TextView) itemView.findViewById(R.id.atm_address);
-            mAtmDistance = (TextView) itemView.findViewById(R.id.atm_distance);
-            mShowPlace = (FrameLayout) itemView.findViewById(R.id.ic_place_container);
+        if (convertView == null) {
+            convertView = ((Activity)mContext).getLayoutInflater().inflate(R.layout.item_atmlist, null);
         }
+
+        final Atm atm = getItem(position);
+
+        TextView atmName = (TextView) convertView.findViewById(R.id.atm_name);
+        if (atmName != null) {
+            atmName.setText(atm.getName());
+        }
+
+        TextView atmAddress = (TextView) convertView.findViewById(R.id.atm_address);
+        if (atmAddress != null) {
+            atmAddress.setText(atm.getAddress() + ", " + atm.getCity());
+        }
+
+        TextView atmDistance = (TextView) convertView.findViewById(R.id.atm_distance);
+        if (atmDistance != null) {
+            atmDistance.setText(Double.toString(atm.getDistance()) + " " + mContext.getResources().getString(R.string.kilometers));
+        }
+
+        FrameLayout showPlace = (FrameLayout) convertView.findViewById(R.id.ic_place_container);
+        if (showPlace != null) {
+            showPlace.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    double lat = atm.getLocation().getLatitude();
+                    double lon = atm.getLocation().getLongitude();
+
+                    Toast.makeText(mContext, "Lat " + lat + " Lon " + lon, Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse("geo:" + lat + "," + lon + "?q=" + lat + "," + lon + "(" + atm.getName() + ")"));
+                    mContext.startActivity(intent);
+                }
+            });
+        }
+
+
+        return convertView;
     }
 }

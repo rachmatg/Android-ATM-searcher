@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
             public void onReceiverResult(int resultCode, Bundle data) {
                 if (resultCode == NetworkHelper.SUCCESS_RESP_CODE) {
                     Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.message_update_success) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
+                    updateAtmsList();
                 } else {
                     Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.message_update_failed) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
                 }
@@ -96,6 +97,17 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, UpdateDataService.class);
         intent.putExtra(UpdateDataService.KEY_RECEIVER_NAME, receiver);
         startService(intent);
+    }
+
+    /**
+     * Method for updating ATM`s list when new data received
+     */
+    private void updateAtmsList(){
+        FragmentManager fm = getSupportFragmentManager();
+        AtmListFragment atmListFragment = (AtmListFragment) fm.findFragmentById(R.id.main_container);
+        if (atmListFragment != null) {
+            atmListFragment.updateList();
+        }
     }
 
 }

@@ -6,12 +6,10 @@
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/atm_list"
+    <ListView
+        android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        android:fadeScrollbars="true"
-        />
+        android:layout_height="match_parent">
+    </ListView>
 
 </RelativeLayout>
