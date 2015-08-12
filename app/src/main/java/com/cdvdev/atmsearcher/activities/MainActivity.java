@@ -21,7 +21,9 @@ import com.cdvdev.atmsearcher.services.UpdateDataService;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String KEY_DATA_UPDATE = "com.cdvdev.atmsearcher.dataupdated";
     private FragmentManager mFm;
+    private boolean mDataUpdated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,20 +35,32 @@ public class MainActivity extends AppCompatActivity {
             setSupportActionBar(toolbar);
         }
 
+        if (savedInstanceState != null) {
+            mDataUpdated = savedInstanceState.getBoolean(KEY_DATA_UPDATE);
+        }
+
         mFm = getSupportFragmentManager();
         Fragment newFragment = null;
 
         if (NetworkHelper.isDeviceOnline(getApplicationContext())) {
              newFragment =  AtmListFragment.newInstance();
+            //if data not updated yet
+            if (!mDataUpdated) {
+                //start service for download data from network and update into DB
+                createUpdateService();
+            }
         } else {
              newFragment = NetworkOffFragment.newInstance();
         }
 
         FragmentsHelper.createFragment(mFm, newFragment, false);
 
-        //start service for download data from network and update into DB
-        createUpdateService();
+    }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(KEY_DATA_UPDATE, mDataUpdated);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -85,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == NetworkHelper.SUCCESS_RESP_CODE) {
                     Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.message_update_success) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
                     updateAtmsList();
+                    mDataUpdated = true;
                 } else {
                     Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.message_update_failed) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
                 }

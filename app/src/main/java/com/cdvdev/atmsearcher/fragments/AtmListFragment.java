@@ -31,17 +31,23 @@ public class AtmListFragment extends ListFragment{
         return new AtmListFragment();
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_atmlist, container, false);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         mAtmArrayList = getAtmArrayList();
 
         mAdapter = new AtmListAdapter(getActivity(), mAtmArrayList);
         setListAdapter(mAdapter);
 
-        return view;
+        //save fragment object
+        setRetainInstance(true);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_atmlist, container, false);
     }
 
     private ArrayList<Atm> getAtmArrayList(){
