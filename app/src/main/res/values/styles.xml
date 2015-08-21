@@ -10,6 +10,9 @@
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
 
+        <!-- don`t working... -->
+        <item name="searchViewStyle">@style/AppSearchViewStyle</item>
+
     </style>
 
 
@@ -42,6 +45,11 @@
 
     <style name="AtmListItem.Icon" parent="AppTheme">
         <item name="android:layout_margin">16dp</item>
+    </style>
+
+    <!-- Styling SearchView widget -->
+    <style name="AppSearchViewStyle" parent="Widget.AppCompat.SearchView">
+       <!-- <item name="queryBackground">@android:color/transparent</item> -->
     </style>
 
 </resources>

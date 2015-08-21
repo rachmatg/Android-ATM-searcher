@@ -37,7 +37,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d("DEBUG", "DatabaseHelper.onCreate()");
 
         db.execSQL(
                 "CREATE TABLE " + TABLE_ATMS + " (" +
@@ -137,32 +136,59 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Method for getting all ATMSs from DB
+     * Method for getting all ATMs
      *
-     * @return ArrayList
+     * @return
      */
     public ArrayList<Atm> getAllAtms() {
+        return getAtmsArray("");
+    }
+
+    /**
+     * Methos for getting searchable ATM
+     *
+     * @param searchString - query string
+     * @return ArrayList<Atm>
+     */
+    public ArrayList<Atm> getSearchAtm(String searchString){
+        return getAtmsArray(searchString);
+    }
+
+
+    /**
+     * Helper method for creating ATM list array
+     *
+     * @param searchString - query string
+     * @return ArrayList<Atm>
+     */
+    private ArrayList<Atm> getAtmsArray(String searchString) {
         ArrayList<Atm> atms = new ArrayList<>();
         Atm atm;
+        String address;
+
+        searchString = String.valueOf(searchString).toLowerCase();
 
         SQLiteDatabase db = getReadableDatabase();
 
-        Cursor cursor = getAtmsCursor();
+        Cursor cursor = getAtmsCursor(searchString);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    atm = new Atm();
-                    atm.setName(getStringFieldValue(cursor, COLUMN_ATM_NAME));
-                    atm.setCountry(getStringFieldValue(cursor, COLUMN_ATM_COUNTRY));
-                    atm.setCityId(getIntFieldValue(cursor, COLUMN_ATM_CITY_ID));
-                    atm.setCity(getStringFieldValue(cursor, COLUMN_ATM_CITY));
-                    atm.setAddress(getStringFieldValue(cursor, COLUMN_ATM_ADDRESS));
-                    atm.setWorktime(getStringFieldValue(cursor, COLUMN_ATM_WORKTIME));
-                    atm.setLocation(new LocationPoint(
-                            getDoubleFieldValue(cursor, COLUMN_ATM_LATITUDE),
-                            getDoubleFieldValue(cursor, COLUMN_ATM_LONGITUDE)
-                    ));
-                    atms.add(atm);
+                    address = getStringFieldValue(cursor, COLUMN_ATM_ADDRESS).toLowerCase();
+                    if (address.contains(searchString)) {
+                        atm = new Atm();
+                        atm.setName(getStringFieldValue(cursor, COLUMN_ATM_NAME));
+                        atm.setCountry(getStringFieldValue(cursor, COLUMN_ATM_COUNTRY));
+                        atm.setCityId(getIntFieldValue(cursor, COLUMN_ATM_CITY_ID));
+                        atm.setCity(getStringFieldValue(cursor, COLUMN_ATM_CITY));
+                        atm.setAddress(getStringFieldValue(cursor, COLUMN_ATM_ADDRESS));
+                        atm.setWorktime(getStringFieldValue(cursor, COLUMN_ATM_WORKTIME));
+                        atm.setLocation(new LocationPoint(
+                                getDoubleFieldValue(cursor, COLUMN_ATM_LATITUDE),
+                                getDoubleFieldValue(cursor, COLUMN_ATM_LONGITUDE)
+                        ));
+                        atms.add(atm);
+                    }
                 } while (cursor.moveToNext());
             }
         }
@@ -177,13 +203,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      *
      * @return Cursor
      */
-    private Cursor getAtmsCursor() {
+    private Cursor getAtmsCursor(String searchString) {
 
+        //LOWER, UPPER DON`T WORKING WITH CIRILLIC AND "LIKE"
         return getReadableDatabase().query(
                 TABLE_ATMS,
                 null,
-                COLUMN_ATM_LATITUDE + " > 0 AND " + COLUMN_ATM_LONGITUDE + " > 0", //where
-                null, //where args
+                COLUMN_ATM_LATITUDE + " > 0 AND " +
+                        COLUMN_ATM_LONGITUDE + " > 0",
+                        //(!searchString.equals("") ? " AND lower(" + COLUMN_ATM_ADDRESS + ") LIKE ?" : ""), //where
+                null,//(!searchString.equals("") ? new String[]{"%" + String.valueOf(searchString) + "%"} : null), //where args (DON`T WORKING WITH CASE-INSENSITIVE)
                 null, //group by
                 null, //having
                 COLUMN_ATM_NAME + " ASC" //order by
