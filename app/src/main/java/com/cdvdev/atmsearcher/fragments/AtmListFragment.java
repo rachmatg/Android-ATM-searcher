@@ -143,6 +143,7 @@ public class AtmListFragment extends ListFragment implements OnBackPressedListen
                 public boolean onClose() {
                     //query all ATM`s list
                     mSearchQueryString = "";
+                    mCallbacks.onCloseSearchView();
                     updateList();
                     return false;
                 }
