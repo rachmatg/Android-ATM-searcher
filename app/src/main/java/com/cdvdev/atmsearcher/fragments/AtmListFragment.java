@@ -89,9 +89,9 @@ public class AtmListFragment extends ListFragment implements OnBackPressedListen
         LocationPoint currentLocation = new LocationPoint(48.462468, 35.036538);
         //get ATMs list from DB
         if (mSearchQueryString.equals("")) {
-            atms = new DatabaseHelper(getActivity()).getAllAtms();
+            atms = DatabaseHelper.getInstance(getActivity()).getAllAtms();
         } else {
-            atms = new DatabaseHelper(getActivity()).getSearchAtm(mSearchQueryString);
+            atms = DatabaseHelper.getInstance(getActivity()).getSearchAtm(mSearchQueryString);
         }
 
         Log.d("DEBUG", "atms size = " + atms.size());

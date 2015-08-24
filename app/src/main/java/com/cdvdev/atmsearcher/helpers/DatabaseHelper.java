@@ -31,7 +31,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     final String COLUMN_ATM_LATITUDE = "latitude";
     final String COLUMN_ATM_LONGITUDE = "longitude";
 
-    public DatabaseHelper(Context context) {
+    private static DatabaseHelper sDatabaseHelper;
+
+    public static synchronized DatabaseHelper getInstance(Context context) {
+         if (sDatabaseHelper == null) {
+             sDatabaseHelper = new DatabaseHelper(context.getApplicationContext());
+         }
+
+        return sDatabaseHelper;
+    }
+
+    private DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
@@ -61,7 +71,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Method for insert or update ATMs in DB
      */
-    public void insertOrUpdateAtms(ArrayList<Atm> atms) {
+    public  void insertOrUpdateAtms(ArrayList<Atm> atms) {
+
+        Log.d("DEBUG", "start insert/update");
 
         SQLiteDatabase db = getWritableDatabase();
         Atm atm;
@@ -71,9 +83,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             atm = atms.get(i);
             cv = new ContentValues();
+            int updateRows;
 
             //skip empty names and kiosks
-           if (atm.getName().equals("") || atm.getName().contains("K10")) {
+            if (atm.getName().equals("") || atm.getName().contains("K10")) {
                 continue;
             }
 
@@ -86,53 +99,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cv.put(COLUMN_ATM_LATITUDE, atm.getLocation().getLatitude());
             cv.put(COLUMN_ATM_LONGITUDE, atm.getLocation().getLongitude());
 
-            if (isAtmRecordExist(atm)) {
-                db.update(
-                        TABLE_ATMS,
-                        cv,
-                        COLUMN_ATM_NAME + "=?",
-                        new String[]{atm.getName()}
-                );
-            } else {
+            updateRows = db.update(
+                    TABLE_ATMS,
+                    cv,
+                    COLUMN_ATM_NAME + "=?",
+                    new String[]{atm.getName()}
+            );
+            //if no ATM in DB, insert it
+            if (updateRows == 0) {
                 db.insert(
                         TABLE_ATMS,
                         null,
                         cv
                 );
             }
-
         }
 
         db.close();
 
-    }
+        Log.d("DEBUG", "end insert/update");
 
-    /**
-     * Method for checking existence of record of ATM
-     *
-     * @param atm Atm
-     * @return Boolean
-     */
-    private boolean isAtmRecordExist(Atm atm) {
-
-        SQLiteDatabase db = getReadableDatabase();
-
-        Cursor cursor = db.query(
-                TABLE_ATMS,
-                new String[]{COLUMN_ATM_NAME},
-                COLUMN_ATM_NAME + "=?",
-                new String[]{atm.getName()},
-                null,
-                null,
-                null
-        );
-
-        int records = cursor.getCount();
-        cursor.close();
-
-    //    Log.d("DEBUG", records > 0 ? atm.getName() + " is exist" : atm.getName() + " is not exist");
-
-        return records > 0;
     }
 
     /**

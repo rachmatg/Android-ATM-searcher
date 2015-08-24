@@ -8,7 +8,6 @@ import android.util.Log;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
@@ -53,7 +52,7 @@ public class UpdateDataService extends IntentService {
 
                             //save into DB
                             try {
-                                DatabaseHelper db = new DatabaseHelper(getApplicationContext());
+                                DatabaseHelper db = DatabaseHelper.getInstance(UpdateDataService.this);
                                 db.insertOrUpdateAtms(atms);
                             } catch (Exception e) {
                                 resultReceiver.send(NetworkHelper.FAILED_RESP_CODE, null);
@@ -61,14 +60,16 @@ public class UpdateDataService extends IntentService {
 
                         }
 
+                        Log.d("DEBUG", "start send resp code");
                         resultReceiver.send(respCode, null);
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
-                        VolleyLog.e("ERROR: ", volleyError.getMessage());
+                      //  VolleyLog.e("ERROR: ", volleyError.toString() + " : " + volleyError.getMessage());
                         resultReceiver.send(NetworkHelper.FAILED_RESP_CODE, null);
+                        Log.e("ERROR", "onErrorResponse: " + volleyError.toString());
                     }
                 });
 

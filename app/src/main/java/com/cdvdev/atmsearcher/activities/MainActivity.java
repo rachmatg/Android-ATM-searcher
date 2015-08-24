@@ -1,5 +1,6 @@
 package com.cdvdev.atmsearcher.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -19,6 +20,7 @@ import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
 import com.cdvdev.atmsearcher.listeners.OnSearchViewListener;
 import com.cdvdev.atmsearcher.receivers.UpdateDataReceiver;
 import com.cdvdev.atmsearcher.services.UpdateDataService;
+
 
 
 public class MainActivity extends AppCompatActivity implements OnSearchViewListener{
@@ -101,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements OnSearchViewListe
             @Override
             public void onReceiverResult(int resultCode, Bundle data) {
                 if (resultCode == NetworkHelper.SUCCESS_RESP_CODE) {
+                    //update data in DB
                     Toast.makeText(MainActivity.this, getApplication().getResources().getString(R.string.message_update_success) + " (" + resultCode + ")", Toast.LENGTH_SHORT).show();
                     updateAtmsList();
                     mDataUpdated = true;
@@ -123,9 +126,10 @@ public class MainActivity extends AppCompatActivity implements OnSearchViewListe
      */
     private void updateAtmsList(){
         FragmentManager fm = getSupportFragmentManager();
-        AtmListFragment atmListFragment = (AtmListFragment) fm.findFragmentById(R.id.main_container);
-        if (atmListFragment != null) {
-            atmListFragment.updateList();
+        Fragment fragment = fm.findFragmentById(R.id.main_container);
+
+        if (fragment instanceof AtmListFragment) {
+            ((AtmListFragment) fragment).updateList();
         }
     }
 
