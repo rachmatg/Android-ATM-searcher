@@ -4,16 +4,16 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import com.cdvdev.atmsearcher.R;
@@ -22,6 +22,7 @@ import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
 import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
 import com.cdvdev.atmsearcher.listeners.OnSearchViewListener;
+import com.cdvdev.atmsearcher.loaders.AtmListUpdateLoader;
 import com.cdvdev.atmsearcher.models.Atm;
 import com.cdvdev.atmsearcher.models.LocationPoint;
 
@@ -31,16 +32,24 @@ import java.util.Collections;
 /**
  * Fragment for creating list of ATMS
  */
-public class AtmListFragment extends ListFragment implements OnBackPressedListener{
+public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackPressedListener,
+                                                                                                                                       LoaderManager.LoaderCallbacks {
 
+    private final static int KEY_UPDATE_LIST_LOADER = 0;
     private ArrayList<Atm> mAtmArrayList;
     private ArrayAdapter<Atm> mAdapter;
     private SearchView mSearchView;
     private String mSearchQueryString = "";
     private OnSearchViewListener mCallbacks;
+    private Loader mUpdateListLoader;
 
-    public static Fragment newInstance(){
+    public static Fragment newInstance() {
         return new AtmListFragment();
+    }
+
+    @Override
+    int getLayoutResId() {
+        return R.layout.fragment_atmlist;
     }
 
     @Override
@@ -56,6 +65,9 @@ public class AtmListFragment extends ListFragment implements OnBackPressedListen
         setRetainInstance(true);
         //create actionbar menu
         setHasOptionsMenu(true);
+        //init loader
+        mUpdateListLoader = getLoaderManager().initLoader(KEY_UPDATE_LIST_LOADER, null, this);
+
     }
 
     @Override
@@ -64,15 +76,24 @@ public class AtmListFragment extends ListFragment implements OnBackPressedListen
 
         try {
             mCallbacks = (OnSearchViewListener) activity;
-        } catch(ClassCastException e) {
+        } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must be implement OnSearchViewListener");
         }
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_atmlist, container, false);
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.d("DEBUG", "On refresh called from SwipeRefresh");
+
+                //TODO: Start refresh operation
+                mUpdateListLoader.forceLoad();
+            }
+        });
     }
 
     @Override
@@ -81,7 +102,7 @@ public class AtmListFragment extends ListFragment implements OnBackPressedListen
         mCallbacks = null;
     }
 
-    private ArrayList<Atm> getAtmArrayList(){
+    private ArrayList<Atm> getAtmArrayList() {
         ArrayList<Atm> atms;
 
         //TODO: need to define current location
@@ -189,7 +210,7 @@ public class AtmListFragment extends ListFragment implements OnBackPressedListen
     /**
      * Method for closing SearchView
      */
-    private void closeSearchView(){
+    private void closeSearchView() {
         //close SearchView
         mSearchView.setQuery("", true);
         mSearchView.setIconified(true);
@@ -200,10 +221,37 @@ public class AtmListFragment extends ListFragment implements OnBackPressedListen
     /**
      * Method for updating ATM`s list
      */
-    public void updateList(){
+    public void updateList() {
         mAtmArrayList.clear();
-        mAtmArrayList.addAll( getAtmArrayList() );
+        mAtmArrayList.addAll(getAtmArrayList());
         mAdapter.notifyDataSetChanged();
+    }
+
+   // ------------------------------- LOADER CALLBACKS
+
+    @Override
+    public Loader onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case KEY_UPDATE_LIST_LOADER:
+                return new AtmListUpdateLoader(getActivity().getBaseContext());
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader loader) {
+        Log.d("DEBUG", "Load reset!");
+        stopRefreshing();
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, Object data) {
+        Log.d("DEBUG", "Load finished!");
+        stopRefreshing();
+        //TODO: update array list
+
+        //TODO: adapter.notifyDataSetChanges()
     }
 
 }

@@ -10,4 +10,11 @@
     <item name="text_primary" type="color">#212121</item>
     <item name="text_secondary" type="color">#727272</item>
     <item name="divider" type="color">#B6B6B6</item>
+
+    <array name="swipe_refresh_colors">
+        <item>#33B5E5</item>
+        <item>#99CC00</item>
+        <item>#FFBB33</item>
+        <item>#FF4444</item>
+    </array>
 </resources>
