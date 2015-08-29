@@ -1,6 +1,7 @@
 package com.cdvdev.atmsearcher.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,16 +16,26 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.adapters.AtmListAdapter;
 import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
+import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
+import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
 import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
 import com.cdvdev.atmsearcher.listeners.OnSearchViewListener;
-import com.cdvdev.atmsearcher.loaders.AtmListUpdateLoader;
+import com.cdvdev.atmsearcher.loaders.DataBaseUpdateLoader;
 import com.cdvdev.atmsearcher.models.Atm;
 import com.cdvdev.atmsearcher.models.LocationPoint;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,16 +43,19 @@ import java.util.Collections;
 /**
  * Fragment for creating list of ATMS
  */
-public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackPressedListener,
-                                                                                                                                       LoaderManager.LoaderCallbacks {
+public class AtmListFragment
+        extends SwipeRefreshBaseFragment
+        implements OnBackPressedListener, LoaderManager.LoaderCallbacks, Response.Listener<JSONObject>, Response.ErrorListener{
 
-    private final static int KEY_UPDATE_LIST_LOADER = 0;
+    private final static int UPDATE_DB_LOADER = 1;
+
+    private Context mContext;
     private ArrayList<Atm> mAtmArrayList;
+    private ArrayList<Atm> mTempAtmArrayList;
     private ArrayAdapter<Atm> mAdapter;
     private SearchView mSearchView;
     private String mSearchQueryString = "";
-    private OnSearchViewListener mCallbacks;
-    private Loader mUpdateListLoader;
+    private OnSearchViewListener mSearchViewCallbacks;
 
     public static Fragment newInstance() {
         return new AtmListFragment();
@@ -56,6 +70,7 @@ public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackP
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mContext = getActivity().getBaseContext();
         mAtmArrayList = getAtmArrayList();
 
         mAdapter = new AtmListAdapter(getActivity(), mAtmArrayList);
@@ -65,9 +80,22 @@ public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackP
         setRetainInstance(true);
         //create actionbar menu
         setHasOptionsMenu(true);
-        //init loader
-        mUpdateListLoader = getLoaderManager().initLoader(KEY_UPDATE_LIST_LOADER, null, this);
 
+        //set refresh listener
+        setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                startUpdateAtmList();
+            }
+        });
+
+        //start first update
+        getSwipeRefreshLayout().post(new Runnable() {
+            @Override
+            public void run() {
+                startUpdateAtmList();
+            }
+        });
     }
 
     @Override
@@ -75,33 +103,22 @@ public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackP
         super.onAttach(activity);
 
         try {
-            mCallbacks = (OnSearchViewListener) activity;
+            mSearchViewCallbacks =  (OnSearchViewListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must be implement OnSearchViewListener");
         }
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                Log.d("DEBUG", "On refresh called from SwipeRefresh");
-
-                //TODO: Start refresh operation
-                mUpdateListLoader.forceLoad();
-            }
-        });
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
-        mCallbacks = null;
+        mSearchViewCallbacks = null;
     }
 
+    /**
+     * Method for creating ordered ATM list by distance
+     * @return ArrayList<Atm>
+     */
     private ArrayList<Atm> getAtmArrayList() {
         ArrayList<Atm> atms;
 
@@ -145,7 +162,7 @@ public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackP
                                 //Toast.makeText(getActivity(), "Query: " + query, Toast.LENGTH_SHORT).show();
                                 //query atms
                                 mSearchQueryString = query;
-                                updateList();
+                                updateListView();
                             }
                             return false;
                         }
@@ -153,7 +170,7 @@ public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackP
                         @Override
                         public boolean onQueryTextChange(String newText) {
                             mSearchQueryString = newText;
-                            updateList();
+                            updateListView();
                             return false;
                         }
                     }
@@ -164,8 +181,8 @@ public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackP
                 public boolean onClose() {
                     //query all ATM`s list
                     mSearchQueryString = "";
-                    mCallbacks.onCloseSearchView();
-                    updateList();
+                    mSearchViewCallbacks.onCloseSearchView();
+                    updateListView();
                     return false;
                 }
             });
@@ -174,7 +191,7 @@ public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackP
             mSearchView.setOnSearchClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mCallbacks.onOpenSearchView();
+                    mSearchViewCallbacks.onOpenSearchView();
                 }
             });
 
@@ -186,7 +203,7 @@ public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackP
     public boolean onBackPressed() {
         if (!mSearchView.isIconified()) {
             closeSearchView();
-            return true;  //not called super.onBackPressed in Activity
+            return true;
         }
 
         return false; //called super.onBackPressed in Activity
@@ -215,25 +232,64 @@ public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackP
         mSearchView.setQuery("", true);
         mSearchView.setIconified(true);
         //hide home action button
-        mCallbacks.onCloseSearchView();
+        mSearchViewCallbacks.onCloseSearchView();
     }
 
     /**
      * Method for updating ATM`s list
      */
-    public void updateList() {
+    private void updateListView() {
         mAtmArrayList.clear();
         mAtmArrayList.addAll(getAtmArrayList());
         mAdapter.notifyDataSetChanged();
     }
 
-   // ------------------------------- LOADER CALLBACKS
+    /**
+     * Method for start updating Atm List
+     */
+    public void startUpdateAtmList(){
+        Log.d("DEBUG", "AtmListFragment.startUpdateAtmList");
+        if (!isRefreshing()) {
+            startRefresh();
+        }
+
+        //create URL request with Volley
+        JsonObjectRequest request = new JsonObjectRequest(
+                NetworkHelper.ATMS_URL,
+                null,
+                this,
+                this
+        );
+        RequestQueue queue = Volley.newRequestQueue(mContext);
+        queue.add(request);
+    }
+
+    /**
+     *  Method for stop updating Atm List
+     */
+    public void stopUpdateAtmList(){
+        updateListView();
+        if (isRefreshing()) {
+            stopRefreshing();
+        }
+    }
+
+    /**
+     *  Method for cancel updating Atm List
+     */
+    public void cancelUpdateAtmList(){
+        if (isRefreshing()) {
+            stopRefreshing();
+        }
+    }
+
+    //------------ LOADER CALLBACKS
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
         switch (id) {
-            case KEY_UPDATE_LIST_LOADER:
-                return new AtmListUpdateLoader(getActivity().getBaseContext());
+            case UPDATE_DB_LOADER:
+                return DataBaseUpdateLoader.getInstance(mContext, mTempAtmArrayList);
             default:
                 return null;
         }
@@ -241,17 +297,42 @@ public class AtmListFragment extends SwipeRefreshBaseFragment implements OnBackP
 
     @Override
     public void onLoaderReset(Loader loader) {
-        Log.d("DEBUG", "Load reset!");
-        stopRefreshing();
+          switch (loader.getId()) {
+              case UPDATE_DB_LOADER:
+                  stopUpdateAtmList();
+                  Toast.makeText(mContext, getResources().getString(R.string.message_update_reset), Toast.LENGTH_SHORT).show();
+                  break;
+          }
     }
 
     @Override
     public void onLoadFinished(Loader loader, Object data) {
-        Log.d("DEBUG", "Load finished!");
-        stopRefreshing();
-        //TODO: update array list
-
-        //TODO: adapter.notifyDataSetChanges()
+        switch (loader.getId()) {
+            case UPDATE_DB_LOADER:
+                stopUpdateAtmList();
+                Toast.makeText(mContext, getResources().getString(R.string.message_update_success), Toast.LENGTH_SHORT).show();
+                getLoaderManager().destroyLoader(UPDATE_DB_LOADER);
+                break;
+        }
     }
 
+    //--------- VOLLEY CALLBACKS
+
+    @Override
+    public void onResponse(JSONObject jsonObject) {
+         int respCode = JsonParseHelper.getRespCode(jsonObject);
+
+        if (respCode == NetworkHelper.SUCCESS_RESP_CODE) {
+            mTempAtmArrayList = JsonParseHelper.getAtmsList(jsonObject);
+            //create loader
+           Loader loader = getLoaderManager().initLoader(UPDATE_DB_LOADER, null, this);
+           loader.forceLoad();
+        }
+    }
+
+    @Override
+    public void onErrorResponse(VolleyError volleyError) {
+        Toast.makeText(mContext, getResources().getString(R.string.message_update_failed), Toast.LENGTH_SHORT).show();
+        cancelUpdateAtmList();
+    }
 }

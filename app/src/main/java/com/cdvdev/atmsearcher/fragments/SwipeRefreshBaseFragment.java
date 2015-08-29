@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +21,18 @@ public abstract class SwipeRefreshBaseFragment extends ListFragment {
     abstract int getLayoutResId();
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //create SwipeRefreshLayout
+        mSwipeRefreshLayout = new ListFragmentSwipeRefreshLayout(getActivity().getBaseContext());
+
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View listFragment = inflater.inflate(getLayoutResId(), container, false);
-
-        //create SwipeRefreshLayout
-        mSwipeRefreshLayout = new ListFragmentSwipeRefreshLayout(container.getContext());
 
         //add list view to SwipeRefreshLayout
         mSwipeRefreshLayout.addView(
@@ -55,6 +62,10 @@ public abstract class SwipeRefreshBaseFragment extends ListFragment {
         return mSwipeRefreshLayout;
     }
 
+    public SwipeRefreshLayout getSwipeRefreshLayout(){
+        return mSwipeRefreshLayout;
+    }
+
     /**
      * Listener for refreshes
      * @param listener SwipeRefreshLayout.OnRefreshListener
@@ -76,6 +87,13 @@ public abstract class SwipeRefreshBaseFragment extends ListFragment {
      */
     public void stopRefreshing(){
         mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    /**
+     * Start refresh progress
+     */
+    public void startRefresh(){
+        mSwipeRefreshLayout.setRefreshing(true);
     }
 
 
