@@ -43,8 +43,8 @@
         <item name="android:singleLine">true</item>
     </style>
 
-    <style name="AtmListItem.Icon" parent="AppTheme">
-        <item name="android:layout_margin">16dp</item>
+    <style name="AtmListItem.IconLayout" parent="AppTheme">
+        <item name="android:padding">16dp</item>
     </style>
 
     <!-- Styling SearchView widget -->

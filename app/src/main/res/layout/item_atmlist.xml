@@ -6,14 +6,14 @@
     <FrameLayout
         android:id="@+id/ic_place_container"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        style="@style/AtmListItem.IconLayout">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:contentDescription="@string/image_description_place"
-            android:src="@drawable/ic_place_black_24dp"
-            style="@style/AtmListItem.Icon"
+            android:src="@drawable/ic_place_red_36dp"
             />
     </FrameLayout>
 
@@ -22,15 +22,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true">
+        android:layout_alignParentRight="true"
+        style="@style/AtmListItem.IconLayout">
 
         <ImageView
             android:id="@+id/ic_info"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:contentDescription="@string/image_description_info"
-            android:src="@drawable/ic_info_black_18dp"
-            style="@style/AtmListItem.Icon"
+            android:src="@drawable/ic_info_gray_24dp"
             />
     </FrameLayout>
 
@@ -42,13 +42,14 @@
         android:layout_marginStart="72dp"
         android:layout_toLeftOf="@+id/ic_info_container"
         android:layout_toStartOf="@+id/ic_info_container"
+        android:paddingTop="16dp"
+        android:paddingBottom="20dp"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/atm_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="16dp"
             style="@style/AtmListItem.TextPrimary"
             />
 
