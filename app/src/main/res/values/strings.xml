@@ -9,10 +9,16 @@
     <string name="message_update_success">Обновление завершено</string>
     <string name="message_update_reset">Обновление прервано</string>
     <string name="message_search_no_items">Ничего не найдено</string>
+    <string name="message_need_on_gps">Для более точного поиска ближайшего банкомата включите определение местоположения по GPS</string>
+    <string name="message_need_on_location">Для поиска ближайшего банкомата включите определение местоположения</string>
     <string name="button_text_repeat">Повторить</string>
+    <string name="button_location_settings">Настройки</string>
     <string name="kilometers">км</string>
 
     <!-- icons -->
     <string name="image_description_place">Показать на карте</string>
     <string name="image_description_info">Показать дополнительную информацию</string>
+
+    <!-- buttons -->
+
 </resources>

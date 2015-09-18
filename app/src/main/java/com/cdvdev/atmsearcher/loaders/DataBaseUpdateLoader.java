@@ -2,6 +2,7 @@ package com.cdvdev.atmsearcher.loaders;
 
 import android.support.v4.content.AsyncTaskLoader;
 import android.content.Context;
+import android.util.Log;
 
 import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
 import com.cdvdev.atmsearcher.models.Atm;
@@ -33,7 +34,11 @@ public class DataBaseUpdateLoader extends AsyncTaskLoader {
     public Object loadInBackground() {
 
         DatabaseHelper db = DatabaseHelper.getInstance(mContext);
-        db.insertOrUpdateAtms(mAtms);
+        try {
+            db.insertOrUpdateAtms(mAtms);
+        } catch (Exception e) {
+            Log.e("ERROR", e.getMessage());
+        }
 
         return null;
     }

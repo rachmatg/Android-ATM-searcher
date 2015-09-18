@@ -30,6 +30,7 @@ import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
 import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
+import com.cdvdev.atmsearcher.listeners.OnLocationListener;
 import com.cdvdev.atmsearcher.listeners.OnSearchViewListener;
 import com.cdvdev.atmsearcher.loaders.DataBaseUpdateLoader;
 import com.cdvdev.atmsearcher.models.Atm;
@@ -45,7 +46,11 @@ import java.util.Collections;
  */
 public class AtmListFragment
         extends SwipeRefreshBaseFragment
-        implements OnBackPressedListener, LoaderManager.LoaderCallbacks, Response.Listener<JSONObject>, Response.ErrorListener{
+        implements OnBackPressedListener,
+                   OnLocationListener,
+                   LoaderManager.LoaderCallbacks,
+                   Response.Listener<JSONObject>,
+                   Response.ErrorListener{
 
     private final static int UPDATE_DB_LOADER = 1;
 
@@ -56,6 +61,7 @@ public class AtmListFragment
     private SearchView mSearchView;
     private String mSearchQueryString = "";
     private OnSearchViewListener mSearchViewCallbacks;
+    private LocationPoint mCurrentLocation = null;
 
     public static Fragment newInstance() {
         return new AtmListFragment();
@@ -122,9 +128,6 @@ public class AtmListFragment
     private ArrayList<Atm> getAtmArrayList() {
         ArrayList<Atm> atms;
 
-        //TODO: need to define current location
-        //current location
-        LocationPoint currentLocation = new LocationPoint(48.462468, 35.036538);
         //get ATMs list from DB
         if (mSearchQueryString.equals("")) {
             atms = DatabaseHelper.getInstance(getActivity()).getAllAtms();
@@ -134,10 +137,13 @@ public class AtmListFragment
 
         Log.d("DEBUG", "atms size = " + atms.size());
 
-        //calculate and set distance for each ATM
-        atms = Utils.addDistanceToAtms(atms, currentLocation);
-        //sorted ArrayList by distance
-        Collections.sort(atms, new Utils.LocationComparator());
+        //if location is defined
+        if (mCurrentLocation != null) {
+            //calculate and set distance for each ATM
+            atms = Utils.addDistanceToAtms(atms, mCurrentLocation);
+            //sorted ArrayList by distance
+            Collections.sort(atms, new Utils.LocationComparator());
+        }
 
         return atms;
     }
@@ -333,6 +339,22 @@ public class AtmListFragment
     @Override
     public void onErrorResponse(VolleyError volleyError) {
         Toast.makeText(mContext, getResources().getString(R.string.message_update_failed), Toast.LENGTH_SHORT).show();
+        Log.e("ERROR", volleyError.toString());
         cancelUpdateAtmList();
+    }
+
+    //------- LOCATION CUSTOM CALLBACKS
+
+    @Override
+    public void onUpdateLocation(LocationPoint locationPoint) {
+        if (locationPoint == null) {
+            Log.d("DEBUG", "Current location IS NULL");
+            mCurrentLocation = null;
+            return;
+        }
+
+        Log.d("DEBUG", "Current location: lat " + locationPoint.getLatitude() + ", lon " + locationPoint.getLongitude());
+        mCurrentLocation = locationPoint;
+        updateListView();
     }
 }

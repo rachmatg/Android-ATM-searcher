@@ -15,7 +15,8 @@ import org.json.JSONObject;
  */
 public class NetworkHelper {
 
-    public static final String ATMS_URL = "https://www.creditdnepr.com/bsclient/v1/cgi/bsi.dll?T=cdb_api.getAtms";
+    //public static final String ATMS_URL = "https://www.creditdnepr.com/bsclient/v1/cgi/bsi.dll?T=cdb_api.getAtms";
+    public static final String ATMS_URL = "https://api.myjson.com/bins/34zse";
     public static final int SUCCESS_RESP_CODE = 0;
     public static final int FAILED_RESP_CODE = 1;
 
