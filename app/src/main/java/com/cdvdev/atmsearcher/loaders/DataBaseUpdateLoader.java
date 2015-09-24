@@ -35,7 +35,7 @@ public class DataBaseUpdateLoader extends AsyncTaskLoader {
 
         DatabaseHelper db = DatabaseHelper.getInstance(mContext);
         try {
-            db.insertOrUpdateAtms(mAtms);
+            db.updateAtms(mAtms);
         } catch (Exception e) {
             Log.e("ERROR", e.getMessage());
         }

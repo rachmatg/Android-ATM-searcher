@@ -253,9 +253,11 @@ public class MainActivity extends AppCompatActivity implements
         if (mCurrentLocation == null) {
             //get last location
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            Toast.makeText(this, "Current location: lat " + mCurrentLocation.getLatitude() + ", lon " + mCurrentLocation.getLongitude(), Toast.LENGTH_SHORT).show();
-            LocationPoint point = new LocationPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-            updateIU(point);
+            if (mCurrentLocation != null) {
+               // Toast.makeText(this, "Current location: lat " + mCurrentLocation.getLatitude() + ", lon " + mCurrentLocation.getLongitude(), Toast.LENGTH_SHORT).show();
+                LocationPoint point = new LocationPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+                updateIU(point);
+            }
         }
 
         startLocationUpdate();

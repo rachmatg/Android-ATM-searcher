@@ -18,6 +18,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -40,6 +42,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * Fragment for creating list of ATMS
@@ -261,11 +264,17 @@ public class AtmListFragment
 
         //create URL request with Volley
         JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,
                 NetworkHelper.ATMS_URL,
                 null,
                 this,
                 this
-        );
+        ){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                return NetworkHelper.getRequestHeaders();
+            }
+        };
         RequestQueue queue = Volley.newRequestQueue(mContext);
         queue.add(request);
     }
@@ -326,13 +335,20 @@ public class AtmListFragment
 
     @Override
     public void onResponse(JSONObject jsonObject) {
-         int respCode = JsonParseHelper.getRespCode(jsonObject);
+        // int respCode = JsonParseHelper.getRespCode(jsonObject);
 
-        if (respCode == NetworkHelper.SUCCESS_RESP_CODE) {
-            mTempAtmArrayList = JsonParseHelper.getAtmsList(jsonObject);
+        Log.d("DEBUG", jsonObject.toString());
+
+      //  if (respCode == NetworkHelper.SUCCESS_RESP_CODE) {
+        mTempAtmArrayList = JsonParseHelper.getAtmsList(jsonObject);
+
+        if (mTempAtmArrayList.size() > 0 ) {
+            Log.d("DEBUG", "mTempAtmArrayList.size() > 0");
             //create loader
            Loader loader = getLoaderManager().initLoader(UPDATE_DB_LOADER, null, this);
            loader.forceLoad();
+        } else {
+            cancelUpdateAtmList();
         }
     }
 

@@ -71,55 +71,74 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Method for insert or update ATMs in DB
      */
-    public  void insertOrUpdateAtms(ArrayList<Atm> atms) {
+    public  void updateAtms(ArrayList<Atm> atms) {
 
-        Log.d("DEBUG", "start insert/update");
+        try {
+            Log.d("DEBUG", "start insert/update");
 
-        SQLiteDatabase db = getWritableDatabase();
-        Atm atm;
-        ContentValues cv;
+            SQLiteDatabase db = getWritableDatabase();
+            Atm atm;
+            ContentValues cv;
+            String whereAtmsIn = "";
 
-        for (int i = 0, j = atms.size(); i < j; i++) {
+            for (int i = 0, j = atms.size(); i < j; i++) {
 
-            atm = atms.get(i);
-            cv = new ContentValues();
-            int updateRows;
+                atm = atms.get(i);
+                cv = new ContentValues();
+                int updateRows;
 
-            //skip empty names and kiosks
-            if (atm.getName().equals("") || atm.getName().contains("K10")) {
-                continue;
+                //skip empty names and kiosks
+                if (atm.getName().equals("") || atm.getName().contains("K10")) {
+                    continue;
+                }
+
+                cv.put(COLUMN_ATM_NAME, atm.getName());
+                cv.put(COLUMN_ATM_COUNTRY, atm.getCountry());
+                cv.put(COLUMN_ATM_CITY_ID, atm.getCityId());
+                cv.put(COLUMN_ATM_CITY, atm.getCity());
+                cv.put(COLUMN_ATM_ADDRESS, atm.getAddress());
+                cv.put(COLUMN_ATM_WORKTIME, atm.getWorktime());
+                cv.put(COLUMN_ATM_LATITUDE, atm.getLocation().getLatitude());
+                cv.put(COLUMN_ATM_LONGITUDE, atm.getLocation().getLongitude());
+
+                updateRows = db.update(
+                        TABLE_ATMS,
+                        cv,
+                        COLUMN_ATM_NAME + "=?",
+                        new String[]{atm.getName()}
+                );
+                //if no ATM in DB, insert it
+                if (updateRows == 0) {
+                    db.insert(
+                            TABLE_ATMS,
+                            null,
+                            cv
+                    );
+                }
+
+                if (whereAtmsIn.equals("")) {
+                    whereAtmsIn = "'" + atm.getName() + "'";
+                } else {
+                    whereAtmsIn = whereAtmsIn + ", '" + atm.getName() + "'";
+                }
             }
 
-            cv.put(COLUMN_ATM_NAME, atm.getName());
-            cv.put(COLUMN_ATM_COUNTRY, atm.getCountry());
-            cv.put(COLUMN_ATM_CITY_ID, atm.getCityId());
-            cv.put(COLUMN_ATM_CITY, atm.getCity());
-            cv.put(COLUMN_ATM_ADDRESS, atm.getAddress());
-            cv.put(COLUMN_ATM_WORKTIME, atm.getWorktime());
-            cv.put(COLUMN_ATM_LATITUDE, atm.getLocation().getLatitude());
-            cv.put(COLUMN_ATM_LONGITUDE, atm.getLocation().getLongitude());
-
-            updateRows = db.update(
-                    TABLE_ATMS,
-                    cv,
-                    COLUMN_ATM_NAME + "=?",
-                    new String[]{atm.getName()}
-            );
-            //if no ATM in DB, insert it
-            if (updateRows == 0) {
-                db.insert(
-                        TABLE_ATMS,
-                        null,
-                        cv
+            //if no ATMs in answer, remove them from DB
+            if (!whereAtmsIn.equals("")) {
+                db.execSQL(
+                        String.format("DELETE FROM " + TABLE_ATMS + " WHERE " + COLUMN_ATM_NAME + " NOT IN (%s)", whereAtmsIn)
                 );
             }
+
+            db.close();
+
+            Log.d("DEBUG", "end insert/update");
+
+        } catch (Exception e) {
+            Log.e("ERROR", e.getMessage());
         }
-
-        db.close();
-
-        Log.d("DEBUG", "end insert/update");
-
     }
+
 
     /**
      * Method for getting all ATMs
@@ -139,7 +158,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList<Atm> getSearchAtm(String searchString){
         return getAtmsArray(searchString);
     }
-
 
     /**
      * Helper method for creating ATM list array
