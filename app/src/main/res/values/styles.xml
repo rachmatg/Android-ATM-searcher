@@ -32,19 +32,24 @@
     </style>
 
     <style name="AtmListItem.TextPrimary" parent="AppTheme">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">@dimen/text_primary_size</item>
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:singleLine">true</item>
     </style>
 
     <style name="AtmListItem.TextSecondary" parent="AppTheme">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/text_secondary_size</item>
         <item name="android:textColor">@color/text_secondary</item>
         <item name="android:singleLine">true</item>
     </style>
 
     <style name="AtmListItem.IconLayout" parent="AppTheme">
         <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="AtmDetail.TextPrimary" parent="AppTheme">
+        <item name="android:textSize">@dimen/text_primary_size</item>
+        <item name="android:textColor">@color/text_primary</item>
     </style>
 
     <!-- Styling SearchView widget -->

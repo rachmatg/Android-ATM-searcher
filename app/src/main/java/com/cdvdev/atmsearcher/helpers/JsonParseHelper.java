@@ -8,11 +8,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class JsonParseHelper {
 
-    private static final String KEY_RESPONSE_CODE = "respcode";
     private static final String KEY_ATMS_ARRAY = "results";
+    private static final String KEY_BANK_NAME = "bank_name";
     private static final String KEY_ATM_NAME = "name";
     private static final String KEY_ATM_COUNTRY = "country";
     private static final String KEY_ATM_CITY_ID = "city_id";
@@ -43,6 +44,7 @@ public class JsonParseHelper {
 
                 atmJsonObject = array.getJSONObject(i);
                 atm = new Atm();
+                atm.setBankName(atmJsonObject.getString(KEY_BANK_NAME));
                 atm.setName(atmJsonObject.getString(KEY_ATM_NAME));
                 atm.setCountry(atmJsonObject.getString(KEY_ATM_COUNTRY));
                 atm.setCityId(atmJsonObject.getInt(KEY_ATM_CITY_ID));
@@ -63,23 +65,4 @@ public class JsonParseHelper {
         return atms;
     }
 
-    /**
-     * Method for getting response code from server response
-     *
-     * @param jsonObject JsonObject
-     * @return Integer
-     */
-    /*
-    public static int getRespCode(JSONObject jsonObject) {
-        int code = -1;
-
-        try {
-            code = jsonObject.getInt(KEY_RESPONSE_CODE);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return code;
-    }
-    */
 }

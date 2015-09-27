@@ -22,6 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     final String TABLE_ATMS = "atms";
 
     final String COLUMN_ATM_ID = "_id";
+    final String COLUMN_BANK_NAME = "bank_name";
     final String COLUMN_ATM_NAME = "name";
     final String COLUMN_ATM_COUNTRY = "country";
     final String COLUMN_ATM_CITY_ID = "city_id";
@@ -51,6 +52,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "CREATE TABLE " + TABLE_ATMS + " (" +
                         COLUMN_ATM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        COLUMN_BANK_NAME + " TEXT, " +
                         COLUMN_ATM_NAME + " TEXT, " +
                         COLUMN_ATM_COUNTRY + " TEXT, " +
                         COLUMN_ATM_CITY_ID + " INTEGER," +
@@ -92,6 +94,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     continue;
                 }
 
+                cv.put(COLUMN_BANK_NAME, atm.getBankName());
                 cv.put(COLUMN_ATM_NAME, atm.getName());
                 cv.put(COLUMN_ATM_COUNTRY, atm.getCountry());
                 cv.put(COLUMN_ATM_CITY_ID, atm.getCityId());
@@ -181,6 +184,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     address = getStringFieldValue(cursor, COLUMN_ATM_ADDRESS).toLowerCase();
                     if (address.contains(searchString)) {
                         atm = new Atm();
+                        atm.setBankName(getStringFieldValue(cursor, COLUMN_BANK_NAME));
                         atm.setName(getStringFieldValue(cursor, COLUMN_ATM_NAME));
                         atm.setCountry(getStringFieldValue(cursor, COLUMN_ATM_COUNTRY));
                         atm.setCityId(getIntFieldValue(cursor, COLUMN_ATM_CITY_ID));

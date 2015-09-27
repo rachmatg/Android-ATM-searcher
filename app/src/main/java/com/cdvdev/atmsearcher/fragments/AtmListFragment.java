@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -31,9 +32,10 @@ import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
 import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
+import com.cdvdev.atmsearcher.listeners.AppBarChangeListener;
 import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
+import com.cdvdev.atmsearcher.listeners.AtmSelectedListener;
 import com.cdvdev.atmsearcher.listeners.OnLocationListener;
-import com.cdvdev.atmsearcher.listeners.OnSearchViewListener;
 import com.cdvdev.atmsearcher.loaders.DataBaseUpdateLoader;
 import com.cdvdev.atmsearcher.models.Atm;
 import com.cdvdev.atmsearcher.models.LocationPoint;
@@ -56,6 +58,8 @@ public class AtmListFragment
                    Response.ErrorListener{
 
     private final static int UPDATE_DB_LOADER = 1;
+    private final static String  KEY_IS_SEARCHVIEW_OPEN = "atmsearcher.issearchviewopen";
+    private final static String KEY_SEARCHVIEW_QUERY = "atmsearcher.searchviewquery";
 
     private Context mContext;
     private ArrayList<Atm> mAtmArrayList;
@@ -63,7 +67,10 @@ public class AtmListFragment
     private ArrayAdapter<Atm> mAdapter;
     private SearchView mSearchView;
     private String mSearchQueryString = "";
-    private OnSearchViewListener mSearchViewCallbacks;
+    private String mSaveSearchQueryString = "";
+    private boolean mIsSearchViewOpen = false;
+    private AtmSelectedListener mAtmSelectedListener;
+    private AppBarChangeListener mAppBarChangeListener;
     private LocationPoint mCurrentLocation = null;
 
     public static Fragment newInstance() {
@@ -73,6 +80,24 @@ public class AtmListFragment
     @Override
     int getLayoutResId() {
         return R.layout.fragment_atmlist;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mAppBarChangeListener =  (AppBarChangeListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must be implement AppBarChangeListener");
+        }
+
+
+        try{
+            mAtmSelectedListener = (AtmSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must be implement AtmSelectedListener");
+        }
     }
 
     @Override
@@ -108,20 +133,56 @@ public class AtmListFragment
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        try {
-            mSearchViewCallbacks =  (OnSearchViewListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must be implement OnSearchViewListener");
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState !=null) {
+             if (savedInstanceState.containsKey(KEY_IS_SEARCHVIEW_OPEN)) {
+                 mIsSearchViewOpen = savedInstanceState.getBoolean(KEY_IS_SEARCHVIEW_OPEN);
+             }
+            if (savedInstanceState.containsKey(KEY_SEARCHVIEW_QUERY)) {
+                mSaveSearchQueryString = savedInstanceState.getString(KEY_SEARCHVIEW_QUERY);
+            }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAppBarChangeListener.onChangeTitle(R.string.app_name);
+
+        if (mSearchView != null && !mSaveSearchQueryString.equals("") ) {
+            mSearchView.setIconified(false);
+            mSearchView.setQuery(mSaveSearchQueryString, true);
+        } else if (!mIsSearchViewOpen) {
+            mAppBarChangeListener.onSetHomeAsUpEnabled(false);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        cancelUpdateAtmList();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroyView() {
+        mSaveSearchQueryString = mSearchView.getQuery().toString();
+        closeSearchView();
+        super.onDestroyView();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mSearchViewCallbacks = null;
+        mAppBarChangeListener = null;
+        mAtmSelectedListener = null;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(KEY_IS_SEARCHVIEW_OPEN, mIsSearchViewOpen);
+        outState.putString(KEY_SEARCHVIEW_QUERY, mSaveSearchQueryString);
+        super.onSaveInstanceState(outState);
     }
 
     /**
@@ -137,8 +198,6 @@ public class AtmListFragment
         } else {
             atms = DatabaseHelper.getInstance(getActivity()).getSearchAtm(mSearchQueryString);
         }
-
-        Log.d("DEBUG", "atms size = " + atms.size());
 
         //if location is defined
         if (mCurrentLocation != null) {
@@ -190,7 +249,8 @@ public class AtmListFragment
                 public boolean onClose() {
                     //query all ATM`s list
                     mSearchQueryString = "";
-                    mSearchViewCallbacks.onCloseSearchView();
+                    mAppBarChangeListener.onSetHomeAsUpEnabled(false);
+                    mIsSearchViewOpen = false;
                     updateListView();
                     return false;
                 }
@@ -200,9 +260,16 @@ public class AtmListFragment
             mSearchView.setOnSearchClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mSearchViewCallbacks.onOpenSearchView();
+                    mAppBarChangeListener.onSetHomeAsUpEnabled(true);
+                    mIsSearchViewOpen = true;
                 }
             });
+
+            //if search view was opened, restore state
+            if (mIsSearchViewOpen) {
+                mSearchView.setIconified(false);
+                mSearchView.setQuery(mSaveSearchQueryString, true);
+            }
 
         }
         super.onCreateOptionsMenu(menu, inflater);
@@ -232,6 +299,11 @@ public class AtmListFragment
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Atm atm = ((AtmListAdapter) getListAdapter()).getItem(position);
+        mAtmSelectedListener.onAtmSelected(atm);
+    }
 
     /**
      * Method for closing SearchView
@@ -241,7 +313,7 @@ public class AtmListFragment
         mSearchView.setQuery("", true);
         mSearchView.setIconified(true);
         //hide home action button
-        mSearchViewCallbacks.onCloseSearchView();
+        mAppBarChangeListener.onSetHomeAsUpEnabled(false);
     }
 
     /**
@@ -257,7 +329,6 @@ public class AtmListFragment
      * Method for start updating Atm List
      */
     public void startUpdateAtmList(){
-        Log.d("DEBUG", "AtmListFragment.startUpdateAtmList");
         if (!isRefreshing()) {
             startRefresh();
         }

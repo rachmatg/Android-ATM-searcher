@@ -1,9 +1,14 @@
 package com.cdvdev.atmsearcher.models;
 
+import java.io.Serializable;
+import java.util.UUID;
+
 /**
  * Model for ATM
  */
-public class Atm {
+public class Atm implements Serializable{
+    private UUID mUUID;
+    private String bankName;
     private String name;
     private String country;
     private int cityId;
@@ -12,6 +17,18 @@ public class Atm {
     private String worktime;
     private LocationPoint location;
     private double distance;
+
+    public Atm(){
+       mUUID = UUID.randomUUID();
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
 
     public String getName() {
         return name;

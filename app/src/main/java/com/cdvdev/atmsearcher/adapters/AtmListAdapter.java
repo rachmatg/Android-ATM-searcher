@@ -14,6 +14,8 @@ import android.widget.Toast;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.models.Atm;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 
 /**
@@ -38,9 +40,9 @@ public class AtmListAdapter extends ArrayAdapter<Atm> {
 
         final Atm atm = getItem(position);
 
-        TextView atmName = (TextView) convertView.findViewById(R.id.atm_name);
-        if (atmName != null) {
-            atmName.setText(atm.getName());
+        TextView bankName = (TextView) convertView.findViewById(R.id.bank_name);
+        if (bankName != null) {
+            bankName.setText(atm.getBankName());
         }
 
         TextView atmAddress = (TextView) convertView.findViewById(R.id.atm_address);
@@ -50,7 +52,8 @@ public class AtmListAdapter extends ArrayAdapter<Atm> {
 
         TextView atmDistance = (TextView) convertView.findViewById(R.id.atm_distance);
         if (atmDistance != null) {
-            atmDistance.setText(Double.toString(atm.getDistance()) + " " + mContext.getResources().getString(R.string.kilometers));
+            double distance = new BigDecimal(atm.getDistance()).setScale(3, RoundingMode.UP).doubleValue();
+            atmDistance.setText( (distance > 0 ? Double.toString(atm.getDistance()) : "--.--") + " " + mContext.getResources().getString(R.string.label_kilometers));
         }
 
         FrameLayout showPlace = (FrameLayout) convertView.findViewById(R.id.ic_place_container);

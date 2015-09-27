@@ -3,6 +3,7 @@ package com.cdvdev.atmsearcher.activities;
 import android.location.Location;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,13 +12,16 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.cdvdev.atmsearcher.R;
+import com.cdvdev.atmsearcher.fragments.AtmDetailFragment;
 import com.cdvdev.atmsearcher.fragments.AtmListFragment;
 import com.cdvdev.atmsearcher.fragments.LocationAlertDialogFragment;
 import com.cdvdev.atmsearcher.fragments.NetworkOffFragment;
 import com.cdvdev.atmsearcher.helpers.FragmentsHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
+import com.cdvdev.atmsearcher.listeners.AppBarChangeListener;
+import com.cdvdev.atmsearcher.listeners.AtmSelectedListener;
 import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
-import com.cdvdev.atmsearcher.listeners.OnSearchViewListener;
+import com.cdvdev.atmsearcher.models.Atm;
 import com.cdvdev.atmsearcher.models.LocationPoint;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -31,15 +35,16 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 
 public class MainActivity extends AppCompatActivity implements
-                                        OnSearchViewListener,
                                         GoogleApiClient.ConnectionCallbacks,
                                         GoogleApiClient.OnConnectionFailedListener,
                                         ResultCallback<LocationSettingsResult>,
-                                        LocationListener{
+                                        LocationListener,
+                                        AtmSelectedListener,
+                                        AppBarChangeListener{
 
     private static final int UPDATE_LOCATION_INTERVAL = 10000; //milliseconds
     private static final int UPDATE_LOCATION_INTERVAL_FASTEST = UPDATE_LOCATION_INTERVAL / 2;
-    private static final String KEY_SHOW_LOCATION_SETTINGS_REQUEST = "show-location-settings-request";
+    private static final String KEY_SHOW_LOCATION_SETTINGS_REQUEST = "atmsearcher.show_location_settings_request";
 
     private FragmentManager mFm;
     private ActionBar mActionBar;
@@ -72,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements
         if (NetworkHelper.isDeviceOnline(getApplicationContext())) {
              mGoogleApiClient = initGoogleApiClient();
              mLocationRequest = initLocationRequest();
-             newFragment =  AtmListFragment.newInstance();
+             newFragment = AtmListFragment.newInstance();
         } else {
              newFragment = NetworkOffFragment.newInstance();
         }
@@ -142,7 +147,6 @@ public class MainActivity extends AppCompatActivity implements
         if (listener != null) {
             backInFragment = listener.onBackPressed();
         }
-
         if (!backInFragment) {
             super.onBackPressed();
         }
@@ -231,18 +235,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    //---- SEARCHVIEW CALLBACKS
-
-    @Override
-    public void onOpenSearchView() {
-        mActionBar.setDisplayHomeAsUpEnabled(true);
-    }
-
-    @Override
-    public void onCloseSearchView() {
-       mActionBar.setDisplayHomeAsUpEnabled(false);
-    }
-
     //----- GOOGLE API CONNECTION CALLBACKS
 
     @Override
@@ -304,5 +296,30 @@ public class MainActivity extends AppCompatActivity implements
         mCurrentLocation = location;
         LocationPoint point = new LocationPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         updateIU(point);
+    }
+
+    //------ ATMS LIST CALLBACKS
+
+    @Override
+    public void onAtmSelected(Atm atm) {
+        Fragment newFragment = AtmDetailFragment.newInstance(atm);
+        FragmentTransaction ft = mFm.beginTransaction();
+        ft.replace(R.id.main_container, newFragment)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack(null);
+        ft.commit();
+
+    }
+
+    //----- CHANGE APPBAR CALLBACKS
+
+    @Override
+    public void onChangeTitle(int res) {
+        mActionBar.setTitle(res > 0 ? res : R.string.app_name);
+    }
+
+    @Override
+    public void onSetHomeAsUpEnabled(boolean isEnabled) {
+        mActionBar.setDisplayHomeAsUpEnabled(isEnabled);
     }
 }
