@@ -15,10 +15,12 @@ import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.fragments.AtmDetailFragment;
 import com.cdvdev.atmsearcher.fragments.AtmListFragment;
 import com.cdvdev.atmsearcher.fragments.LocationAlertDialogFragment;
+import com.cdvdev.atmsearcher.fragments.AtmMapFragment;
 import com.cdvdev.atmsearcher.fragments.NetworkOffFragment;
 import com.cdvdev.atmsearcher.helpers.FragmentsHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 import com.cdvdev.atmsearcher.listeners.AppBarChangeListener;
+import com.cdvdev.atmsearcher.listeners.AtmDetailListener;
 import com.cdvdev.atmsearcher.listeners.AtmSelectedListener;
 import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
 import com.cdvdev.atmsearcher.models.Atm;
@@ -40,7 +42,8 @@ public class MainActivity extends AppCompatActivity implements
                                         ResultCallback<LocationSettingsResult>,
                                         LocationListener,
                                         AtmSelectedListener,
-                                        AppBarChangeListener{
+                                        AppBarChangeListener,
+                                        AtmDetailListener{
 
     private static final int UPDATE_LOCATION_INTERVAL = 10000; //milliseconds
     private static final int UPDATE_LOCATION_INTERVAL_FASTEST = UPDATE_LOCATION_INTERVAL / 2;
@@ -321,5 +324,17 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSetHomeAsUpEnabled(boolean isEnabled) {
         mActionBar.setDisplayHomeAsUpEnabled(isEnabled);
+    }
+
+    //--- AtmDetailFragment CALLBACKS
+
+    @Override
+    public void onGoToMap(Atm atm) {
+        Log.d("DEBUG", "MainActivity.onGoToMap()");
+        FragmentTransaction ft = mFm.beginTransaction();
+        ft.replace(R.id.main_container, AtmMapFragment.newInstance(atm))
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack(null);
+        ft.commit();
     }
 }
