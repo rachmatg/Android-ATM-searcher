@@ -32,9 +32,8 @@ import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
 import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
-import com.cdvdev.atmsearcher.listeners.AppBarChangeListener;
+import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
-import com.cdvdev.atmsearcher.listeners.AtmSelectedListener;
 import com.cdvdev.atmsearcher.listeners.OnLocationListener;
 import com.cdvdev.atmsearcher.loaders.DataBaseUpdateLoader;
 import com.cdvdev.atmsearcher.models.Atm;
@@ -69,8 +68,7 @@ public class AtmListFragment
     private String mSearchQueryString = "";
     private String mSaveSearchQueryString = "";
     private boolean mIsSearchViewOpen = false;
-    private AtmSelectedListener mAtmSelectedListener;
-    private AppBarChangeListener mAppBarChangeListener;
+    private FragmentListener mFragmentListener;
     private LocationPoint mCurrentLocation = null;
 
     public static Fragment newInstance() {
@@ -86,17 +84,10 @@ public class AtmListFragment
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        try {
-            mAppBarChangeListener =  (AppBarChangeListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must be implement AppBarChangeListener");
-        }
-
-
         try{
-            mAtmSelectedListener = (AtmSelectedListener) activity;
+            mFragmentListener = (FragmentListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must be implement AtmSelectedListener");
+            throw new ClassCastException(activity.toString() + " must be implement FragmentListener");
         }
     }
 
@@ -148,13 +139,13 @@ public class AtmListFragment
     @Override
     public void onResume() {
         super.onResume();
-        mAppBarChangeListener.onChangeTitle(R.string.app_name);
+        mFragmentListener.onChangeAppBarTitle(R.string.app_name);
 
         if (mSearchView != null && !mSaveSearchQueryString.equals("") ) {
             mSearchView.setIconified(false);
             mSearchView.setQuery(mSaveSearchQueryString, true);
         } else if (!mIsSearchViewOpen) {
-            mAppBarChangeListener.onSetHomeAsUpEnabled(false);
+            mFragmentListener.onSetHomeAsUpEnabled(false);
         }
     }
 
@@ -174,8 +165,7 @@ public class AtmListFragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mAppBarChangeListener = null;
-        mAtmSelectedListener = null;
+        mFragmentListener = null;
     }
 
     @Override
@@ -249,7 +239,7 @@ public class AtmListFragment
                 public boolean onClose() {
                     //query all ATM`s list
                     mSearchQueryString = "";
-                    mAppBarChangeListener.onSetHomeAsUpEnabled(false);
+                    mFragmentListener.onSetHomeAsUpEnabled(false);
                     mIsSearchViewOpen = false;
                     updateListView();
                     return false;
@@ -260,7 +250,7 @@ public class AtmListFragment
             mSearchView.setOnSearchClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mAppBarChangeListener.onSetHomeAsUpEnabled(true);
+                    mFragmentListener.onSetHomeAsUpEnabled(true);
                     mIsSearchViewOpen = true;
                 }
             });
@@ -302,7 +292,7 @@ public class AtmListFragment
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Atm atm = ((AtmListAdapter) getListAdapter()).getItem(position);
-        mAtmSelectedListener.onAtmSelected(atm);
+        mFragmentListener.onAtmListItemSelected(atm);
     }
 
     /**
@@ -313,7 +303,7 @@ public class AtmListFragment
         mSearchView.setQuery("", true);
         mSearchView.setIconified(true);
         //hide home action button
-        mAppBarChangeListener.onSetHomeAsUpEnabled(false);
+        mFragmentListener.onSetHomeAsUpEnabled(false);
     }
 
     /**

@@ -12,8 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.cdvdev.atmsearcher.R;
-import com.cdvdev.atmsearcher.listeners.AppBarChangeListener;
-import com.cdvdev.atmsearcher.listeners.AtmDetailListener;
+import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.models.Atm;
 
 /**
@@ -22,8 +21,7 @@ import com.cdvdev.atmsearcher.models.Atm;
 public class AtmDetailFragment extends Fragment {
 
     private static final String KEY_BUNDLE_ATM = "atmsearcher.atm";
-    private AppBarChangeListener mAppBarChangeListener;
-    private AtmDetailListener mAtmDetailListener;
+    private FragmentListener mFragmentListener;
 
     public static Fragment newInstance(Atm atm) {
         Fragment fragment = new AtmDetailFragment();
@@ -38,15 +36,9 @@ public class AtmDetailFragment extends Fragment {
         super.onAttach(activity);
 
         try {
-            mAppBarChangeListener = (AppBarChangeListener) activity;
+            mFragmentListener = (FragmentListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must be implement AppBarChangeListener");
-        }
-
-        try {
-            mAtmDetailListener = (AtmDetailListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must be implement AtmDetailListener");
+            throw new ClassCastException(activity.toString() + " must be implement FragmentListener");
         }
 
     }
@@ -81,7 +73,7 @@ public class AtmDetailFragment extends Fragment {
                 buttonAtmOnMap.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mAtmDetailListener.onGoToMap(atm);
+                        mFragmentListener.onViewAtmOnMap(atm);
                     }
                 });
             }
@@ -93,15 +85,14 @@ public class AtmDetailFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mAppBarChangeListener.onChangeTitle(R.string.title_detail_fragment);
-        mAppBarChangeListener.onSetHomeAsUpEnabled(true);
+        mFragmentListener.onChangeAppBarTitle(R.string.title_detail_fragment);
+        mFragmentListener.onSetHomeAsUpEnabled(true);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mAppBarChangeListener = null;
-        mAtmDetailListener = null;
+        mFragmentListener = null;
     }
 
     @Override

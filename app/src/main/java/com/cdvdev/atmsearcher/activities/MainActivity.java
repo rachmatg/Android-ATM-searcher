@@ -19,9 +19,7 @@ import com.cdvdev.atmsearcher.fragments.AtmMapFragment;
 import com.cdvdev.atmsearcher.fragments.NetworkOffFragment;
 import com.cdvdev.atmsearcher.helpers.FragmentsHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
-import com.cdvdev.atmsearcher.listeners.AppBarChangeListener;
-import com.cdvdev.atmsearcher.listeners.AtmDetailListener;
-import com.cdvdev.atmsearcher.listeners.AtmSelectedListener;
+import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
 import com.cdvdev.atmsearcher.models.Atm;
 import com.cdvdev.atmsearcher.models.LocationPoint;
@@ -41,9 +39,7 @@ public class MainActivity extends AppCompatActivity implements
                                         GoogleApiClient.OnConnectionFailedListener,
                                         ResultCallback<LocationSettingsResult>,
                                         LocationListener,
-                                        AtmSelectedListener,
-                                        AppBarChangeListener,
-                                        AtmDetailListener{
+                                        FragmentListener{
 
     private static final int UPDATE_LOCATION_INTERVAL = 10000; //milliseconds
     private static final int UPDATE_LOCATION_INTERVAL_FASTEST = UPDATE_LOCATION_INTERVAL / 2;
@@ -301,23 +297,20 @@ public class MainActivity extends AppCompatActivity implements
         updateIU(point);
     }
 
-    //------ ATMS LIST CALLBACKS
+    //--- FRAGMENTS CALLBACKS
 
     @Override
-    public void onAtmSelected(Atm atm) {
+    public void onAtmListItemSelected(Atm atm) {
         Fragment newFragment = AtmDetailFragment.newInstance(atm);
         FragmentTransaction ft = mFm.beginTransaction();
         ft.replace(R.id.main_container, newFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack(null);
         ft.commit();
-
     }
 
-    //----- CHANGE APPBAR CALLBACKS
-
     @Override
-    public void onChangeTitle(int res) {
+    public void onChangeAppBarTitle(int res) {
         mActionBar.setTitle(res > 0 ? res : R.string.app_name);
     }
 
@@ -326,15 +319,13 @@ public class MainActivity extends AppCompatActivity implements
         mActionBar.setDisplayHomeAsUpEnabled(isEnabled);
     }
 
-    //--- AtmDetailFragment CALLBACKS
-
     @Override
-    public void onGoToMap(Atm atm) {
-        Log.d("DEBUG", "MainActivity.onGoToMap()");
+    public void onViewAtmOnMap(Atm atm) {
         FragmentTransaction ft = mFm.beginTransaction();
         ft.replace(R.id.main_container, AtmMapFragment.newInstance(atm))
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack(null);
         ft.commit();
     }
+
 }
