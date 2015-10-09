@@ -3,6 +3,6 @@ package com.cdvdev.atmsearcher.listeners;
 /**
  * Listener for fragments
  */
-public interface OnBackPressedListener {
+public interface BackPressedListener {
     boolean onBackPressed();
 }

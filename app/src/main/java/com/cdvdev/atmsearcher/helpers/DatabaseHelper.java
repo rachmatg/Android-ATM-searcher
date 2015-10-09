@@ -76,7 +76,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public  void updateAtms(ArrayList<Atm> atms) {
 
         try {
-            Log.d("DEBUG", "start insert/update");
+            Log.d(Utils.TAG_DEBUG_LOG, "start insert/update");
 
             SQLiteDatabase db = getWritableDatabase();
             Atm atm;
@@ -135,7 +135,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             db.close();
 
-            Log.d("DEBUG", "end insert/update");
+            Log.d(Utils.TAG_DEBUG_LOG, "end insert/update");
 
         } catch (Exception e) {
             Log.e("ERROR", e.getMessage());

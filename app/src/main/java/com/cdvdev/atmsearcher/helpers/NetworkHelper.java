@@ -17,14 +17,11 @@ import java.util.HashMap;
  */
 public class NetworkHelper {
 
-    //public static final String ATMS_URL = "https://www.creditdnepr.com/bsclient/v1/cgi/bsi.dll?T=cdb_api.getAtms";
     public static final String PARSE_API_VERSION = "1";
     public static final String PARSE_APPLICATION_ID = "shwbK8hzXFEK3CDQO5hJ2Sy1pz6asmo7ZqRqVJKA";
     public static final String PARSE_API_KEY = "mlmog7WlQUB2KbNbWMRXb918rruarYDs6Q0nmfMY";
-
     public static final String ATMS_URL = "https://api.parse.com/" + PARSE_API_VERSION + "/classes/atms_list";
-   // public static final int SUCCESS_RESP_CODE = 0;
-  //  public static final int FAILED_RESP_CODE = 1;
+    public static final int WAITING_ANSWER_TIMEOUT = 10000;
 
 
     /**
@@ -42,10 +39,10 @@ public class NetworkHelper {
 
     /**
      * Method which creating headers for HTTP request to Parse.com
-     * @return HashMap<String, String>
+     * @return HashMap
      */
     public static HashMap<String, String> getRequestHeaders(){
-        HashMap<String, String> headers = new HashMap<String, String>();
+        HashMap<String, String> headers = new HashMap<>();
         headers.put("X-Parse-Application-Id", PARSE_APPLICATION_ID);
         headers.put("X-Parse-REST-API-Key", PARSE_API_KEY);
         return headers;

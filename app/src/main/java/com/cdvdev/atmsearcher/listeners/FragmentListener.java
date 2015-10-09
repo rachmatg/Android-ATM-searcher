@@ -10,4 +10,6 @@ public interface FragmentListener {
     void onChangeAppBarTitle(int res);
     void onSetHomeAsUpEnabled(boolean isEnabled);
     void onViewAtmOnMap(Atm atm);
+    boolean onGetUpdateProgress();
+    void onRefreshData();
 }

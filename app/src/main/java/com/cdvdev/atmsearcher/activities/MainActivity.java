@@ -4,6 +4,8 @@ import android.location.Location;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +13,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.fragments.AtmDetailFragment;
 import com.cdvdev.atmsearcher.fragments.AtmListFragment;
@@ -18,32 +27,43 @@ import com.cdvdev.atmsearcher.fragments.LocationAlertDialogFragment;
 import com.cdvdev.atmsearcher.fragments.AtmMapFragment;
 import com.cdvdev.atmsearcher.fragments.NetworkOffFragment;
 import com.cdvdev.atmsearcher.helpers.FragmentsHelper;
+import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
+import com.cdvdev.atmsearcher.helpers.Utils;
+import com.cdvdev.atmsearcher.listeners.CustomLocationListener;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
-import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
+import com.cdvdev.atmsearcher.listeners.GoogleApiListener;
+import com.cdvdev.atmsearcher.listeners.BackPressedListener;
+import com.cdvdev.atmsearcher.listeners.ProgressListener;
+import com.cdvdev.atmsearcher.listeners.VolleyListener;
+import com.cdvdev.atmsearcher.loaders.DataBaseUpdateLoader;
 import com.cdvdev.atmsearcher.models.Atm;
-import com.cdvdev.atmsearcher.models.LocationPoint;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity implements
-                                        GoogleApiClient.ConnectionCallbacks,
-                                        GoogleApiClient.OnConnectionFailedListener,
-                                        ResultCallback<LocationSettingsResult>,
-                                        LocationListener,
-                                        FragmentListener{
+                                        GoogleApiListener,
+                                        CustomLocationListener,
+                                        FragmentListener,
+                                        VolleyListener,
+                                        LoaderManager.LoaderCallbacks{
 
     private static final int UPDATE_LOCATION_INTERVAL = 10000; //milliseconds
     private static final int UPDATE_LOCATION_INTERVAL_FASTEST = UPDATE_LOCATION_INTERVAL / 2;
     private static final String KEY_SHOW_LOCATION_SETTINGS_REQUEST = "atmsearcher.show_location_settings_request";
+    private static final String REQUESTS_VOLLEY_TAG = "volley.requests";
+    private final static int UPDATE_DB_LOADER_ID = 1;
 
     private FragmentManager mFm;
     private ActionBar mActionBar;
@@ -51,6 +71,9 @@ public class MainActivity extends AppCompatActivity implements
     private LocationRequest mLocationRequest;
     private Location mCurrentLocation;
     private boolean mShowLocationSettingsRequest = true;
+    private ArrayList<Atm> mTempAtmArrayList;
+    private RequestQueue mRequestQueue;
+    private boolean isUpdating = false;
 
 
     @Override
@@ -66,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements
         mActionBar = getSupportActionBar();
 
         mFm = getSupportFragmentManager();
-        Fragment newFragment = null;
+        Fragment newFragment;
 
         //update values from Bundle
         if (savedInstanceState != null) {
@@ -76,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements
         if (NetworkHelper.isDeviceOnline(getApplicationContext())) {
              mGoogleApiClient = initGoogleApiClient();
              mLocationRequest = initLocationRequest();
+             doUpdateAtms();
              newFragment = AtmListFragment.newInstance();
         } else {
              newFragment = NetworkOffFragment.newInstance();
@@ -91,16 +115,6 @@ public class MainActivity extends AppCompatActivity implements
         if ( mGoogleApiClient != null ) {
              mGoogleApiClient.connect();
              checkLocationSettings();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mGoogleApiClient != null) {
-            if (mGoogleApiClient.isConnected()) {
-                mGoogleApiClient.disconnect();
-            }
         }
     }
 
@@ -125,6 +139,20 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient != null) {
+            if (mGoogleApiClient.isConnected()) {
+                mGoogleApiClient.disconnect();
+            }
+        }
+
+        if (mRequestQueue != null) {
+            mRequestQueue.cancelAll(REQUESTS_VOLLEY_TAG);
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(KEY_SHOW_LOCATION_SETTINGS_REQUEST, mShowLocationSettingsRequest);
         super.onSaveInstanceState(outState);
@@ -132,13 +160,13 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        OnBackPressedListener listener = null;
+        BackPressedListener listener = null;
         boolean backInFragment = false;
 
-        //inplement back pressed listener in fragment
+        //implement back pressed listener in fragment
         for (Fragment fragment : mFm.getFragments()) {
-            if (fragment instanceof OnBackPressedListener) {
-                listener = (OnBackPressedListener) fragment;
+            if (fragment instanceof BackPressedListener) {
+                listener = (BackPressedListener) fragment;
                 break;
             }
         }
@@ -156,7 +184,6 @@ public class MainActivity extends AppCompatActivity implements
      * @return GoogleApiClient
      */
     private GoogleApiClient initGoogleApiClient() {
-
         return new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
@@ -203,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Helper method for starting location updates
      */
-    private void startLocationUpdate(){
+    private void startLocationUpdate() {
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient,
                 mLocationRequest,
@@ -223,13 +250,61 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * Helper method for updating ATM`s list
-     * @param point -LocationPoint
+     * @param location -Location
      */
-    private void updateIU(LocationPoint point) {
+    private void updateIU(Location location) {
         for (Fragment fragment : mFm.getFragments()) {
             if (fragment instanceof AtmListFragment) {
-                ((AtmListFragment) fragment).onUpdateLocation(point);
+                ((AtmListFragment) fragment).updateFragmentUI(location);
                 break;
+            }
+        }
+    }
+
+    /**
+     * Method for sending Network request for updating ATMs list
+     */
+    private void doUpdateAtms() {
+
+        if (isUpdating) {
+            Toast.makeText(this, getResources().getString(R.string.message_update_waiting), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isUpdating = true;
+        //create URL request with Volley
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,
+                NetworkHelper.ATMS_URL,
+                null,
+                this,
+                this
+        ){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                return NetworkHelper.getRequestHeaders();
+            }
+        };
+        request.setTag(REQUESTS_VOLLEY_TAG);
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                NetworkHelper.WAITING_ANSWER_TIMEOUT,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+        mRequestQueue = Volley.newRequestQueue(getBaseContext());
+        mRequestQueue.add(request);
+    }
+
+    /**
+     * Helper method for hiding progress bar in some fragments
+     * @param isHide - true - hide progress
+     */
+    private void hideProgress(boolean isHide) {
+        isUpdating = false;
+        Fragment fragment = mFm.findFragmentById(R.id.main_container);
+        if (fragment != null) {
+            if (fragment instanceof ProgressListener) {
+                ((ProgressListener) fragment).onShowHideProgressBar(!isHide);
             }
         }
     }
@@ -238,21 +313,16 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(Bundle bundle) {
-       // LocationPoint point = null;
-
         Toast.makeText(this, "GoogleApiClient connected!", Toast.LENGTH_SHORT).show();
         if (mCurrentLocation == null) {
             //get last location
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mCurrentLocation != null) {
-               // Toast.makeText(this, "Current location: lat " + mCurrentLocation.getLatitude() + ", lon " + mCurrentLocation.getLongitude(), Toast.LENGTH_SHORT).show();
-                LocationPoint point = new LocationPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-                updateIU(point);
+                updateIU(mCurrentLocation);
             }
         }
 
         startLocationUpdate();
-
     }
 
     @Override
@@ -268,8 +338,13 @@ public class MainActivity extends AppCompatActivity implements
         Toast.makeText(this, "GoogleApiClient connection failed! Code " + connectionResult.getErrorCode(), Toast.LENGTH_SHORT).show();
     }
 
+    //----- LOCATION CUSTOM CALLBACKS
 
-    //---- CHECK LOCATION SETTINGS RESULT CALLBACK
+    @Override
+    public void onLocationChanged(Location location) {
+        mCurrentLocation = location;
+        updateIU(mCurrentLocation);
+    }
 
     @Override
     public void onResult(LocationSettingsResult locationSettingsResult) {
@@ -287,14 +362,61 @@ public class MainActivity extends AppCompatActivity implements
         mShowLocationSettingsRequest = false;
     }
 
-    //---- LOCATION CALLBACK
+    //--------- VOLLEY CALLBACKS
+    @Override
+    public void onResponse(JSONObject jsonObject) {
+        mTempAtmArrayList = JsonParseHelper.getAtmsList(jsonObject);
+        if (mTempAtmArrayList.size() > 0 ) {
+            //create loader
+            Loader loader = getSupportLoaderManager().initLoader(UPDATE_DB_LOADER_ID, null, this);
+            loader.forceLoad();
+        }
+    }
 
     @Override
-    public void onLocationChanged(Location location) {
-        Log.d("DEBUG", "location = " + location.toString());
-        mCurrentLocation = location;
-        LocationPoint point = new LocationPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        updateIU(point);
+    public void onErrorResponse(VolleyError volleyError) {
+        Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onErrorResponse: ОШИБКА ОБНОВЛЕНИЯ");
+        Toast.makeText(this, getResources().getString(R.string.message_update_failed), Toast.LENGTH_SHORT).show();
+        Log.e("ERROR", volleyError.toString());
+        updateIU(mCurrentLocation);
+        hideProgress(true);
+    }
+
+    //--- LOADER CALLBACKS
+
+    @Override
+    public Loader onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case UPDATE_DB_LOADER_ID:
+                return DataBaseUpdateLoader.getInstance(this, mTempAtmArrayList);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader loader) {
+       Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onLoaderReset: ОБНОВЛЕНИЕ ПРЕРВАНО");
+       switch (loader.getId()) {
+           case UPDATE_DB_LOADER_ID:
+               updateIU(mCurrentLocation);
+               hideProgress(true);
+               Toast.makeText(this, getResources().getString(R.string.message_update_reset), Toast.LENGTH_SHORT).show();
+               break;
+       }
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, Object data) {
+       Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onLoadFinished: ОБНОВЛЕНИЕ ЗАВЕРШЕНО");
+       switch (loader.getId()) {
+           case UPDATE_DB_LOADER_ID:
+               updateIU(mCurrentLocation);
+               hideProgress(true);
+               Toast.makeText(this, getResources().getString(R.string.message_update_success), Toast.LENGTH_SHORT).show();
+               getSupportLoaderManager().destroyLoader(UPDATE_DB_LOADER_ID);
+               break;
+       }
     }
 
     //--- FRAGMENTS CALLBACKS
@@ -328,4 +450,13 @@ public class MainActivity extends AppCompatActivity implements
         ft.commit();
     }
 
+    @Override
+    public boolean onGetUpdateProgress() {
+        return isUpdating;
+    }
+
+    @Override
+    public void onRefreshData() {
+        doUpdateAtms();
+    }
 }

@@ -11,6 +11,9 @@ import java.util.Comparator;
 
 public class Utils {
 
+    public static final String TAG_DEBUG_LOG = "DEBUG";
+    public static final String TAG_ERROR_LOG = "ERROR";
+
     /**
      * Method for set distance for each Atm
      * @param atms Atm

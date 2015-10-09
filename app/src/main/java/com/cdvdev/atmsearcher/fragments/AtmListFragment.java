@@ -1,12 +1,10 @@
 package com.cdvdev.atmsearcher.fragments;
 
 import android.app.Activity;
-import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.SearchView;
@@ -17,59 +15,39 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.cdvdev.atmsearcher.R;
+import com.cdvdev.atmsearcher.activities.MainActivity;
 import com.cdvdev.atmsearcher.adapters.AtmListAdapter;
 import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
-import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
-import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
-import com.cdvdev.atmsearcher.listeners.OnBackPressedListener;
-import com.cdvdev.atmsearcher.listeners.OnLocationListener;
-import com.cdvdev.atmsearcher.loaders.DataBaseUpdateLoader;
+import com.cdvdev.atmsearcher.listeners.BackPressedListener;
+import com.cdvdev.atmsearcher.listeners.ProgressListener;
 import com.cdvdev.atmsearcher.models.Atm;
 import com.cdvdev.atmsearcher.models.LocationPoint;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Map;
 
 /**
  * Fragment for creating list of ATMS
  */
 public class AtmListFragment
         extends SwipeRefreshBaseFragment
-        implements OnBackPressedListener,
-                   OnLocationListener,
-                   LoaderManager.LoaderCallbacks,
-                   Response.Listener<JSONObject>,
-                   Response.ErrorListener{
+        implements BackPressedListener, ProgressListener {
 
-    private final static int UPDATE_DB_LOADER = 1;
     private final static String  KEY_IS_SEARCHVIEW_OPEN = "atmsearcher.issearchviewopen";
     private final static String KEY_SEARCHVIEW_QUERY = "atmsearcher.searchviewquery";
 
-    private Context mContext;
     private ArrayList<Atm> mAtmArrayList;
-    private ArrayList<Atm> mTempAtmArrayList;
     private ArrayAdapter<Atm> mAdapter;
     private SearchView mSearchView;
     private String mSearchQueryString = "";
     private String mSaveSearchQueryString = "";
     private boolean mIsSearchViewOpen = false;
     private FragmentListener mFragmentListener;
-    private LocationPoint mCurrentLocation = null;
+    private LocationPoint mCurrentLocationPoint = null;
 
     public static Fragment newInstance() {
         return new AtmListFragment();
@@ -95,7 +73,6 @@ public class AtmListFragment
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mContext = getActivity().getBaseContext();
         mAtmArrayList = getAtmArrayList();
 
         mAdapter = new AtmListAdapter(getActivity(), mAtmArrayList);
@@ -110,17 +87,10 @@ public class AtmListFragment
         setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                startUpdateAtmList();
+                mFragmentListener.onRefreshData();
             }
         });
 
-        //start first update
-        getSwipeRefreshLayout().post(new Runnable() {
-            @Override
-            public void run() {
-                startUpdateAtmList();
-            }
-        });
     }
 
     @Override
@@ -139,6 +109,7 @@ public class AtmListFragment
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onResume: start");
         mFragmentListener.onChangeAppBarTitle(R.string.app_name);
 
         if (mSearchView != null && !mSaveSearchQueryString.equals("") ) {
@@ -147,11 +118,17 @@ public class AtmListFragment
         } else if (!mIsSearchViewOpen) {
             mFragmentListener.onSetHomeAsUpEnabled(false);
         }
+
+        onShowHideProgressBar(mFragmentListener.onGetUpdateProgress());
+     }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
     }
 
     @Override
     public void onPause() {
-        cancelUpdateAtmList();
         super.onPause();
     }
 
@@ -190,9 +167,9 @@ public class AtmListFragment
         }
 
         //if location is defined
-        if (mCurrentLocation != null) {
+        if (mCurrentLocationPoint != null) {
             //calculate and set distance for each ATM
-            atms = Utils.addDistanceToAtms(atms, mCurrentLocation);
+            atms = Utils.addDistanceToAtms(atms, mCurrentLocationPoint);
             //sorted ArrayList by distance
             Collections.sort(atms, new Utils.LocationComparator());
         }
@@ -315,123 +292,39 @@ public class AtmListFragment
         mAdapter.notifyDataSetChanged();
     }
 
-    /**
-     * Method for start updating Atm List
-     */
-    public void startUpdateAtmList(){
-        if (!isRefreshing()) {
-            startRefresh();
-        }
+    public void updateFragmentUI(Location location) {
 
-        //create URL request with Volley
-        JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.GET,
-                NetworkHelper.ATMS_URL,
-                null,
-                this,
-                this
-        ){
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                return NetworkHelper.getRequestHeaders();
-            }
-        };
-        RequestQueue queue = Volley.newRequestQueue(mContext);
-        queue.add(request);
-    }
-
-    /**
-     *  Method for stop updating Atm List
-     */
-    public void stopUpdateAtmList(){
-        updateListView();
-        if (isRefreshing()) {
-            stopRefreshing();
-        }
-    }
-
-    /**
-     *  Method for cancel updating Atm List
-     */
-    public void cancelUpdateAtmList(){
-        if (isRefreshing()) {
-            stopRefreshing();
-        }
-    }
-
-    //------------ LOADER CALLBACKS
-
-    @Override
-    public Loader onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case UPDATE_DB_LOADER:
-                return DataBaseUpdateLoader.getInstance(mContext, mTempAtmArrayList);
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader loader) {
-          switch (loader.getId()) {
-              case UPDATE_DB_LOADER:
-                  stopUpdateAtmList();
-                  Toast.makeText(mContext, getResources().getString(R.string.message_update_reset), Toast.LENGTH_SHORT).show();
-                  break;
-          }
-    }
-
-    @Override
-    public void onLoadFinished(Loader loader, Object data) {
-        switch (loader.getId()) {
-            case UPDATE_DB_LOADER:
-                stopUpdateAtmList();
-                Toast.makeText(mContext, getResources().getString(R.string.message_update_success), Toast.LENGTH_SHORT).show();
-                getLoaderManager().destroyLoader(UPDATE_DB_LOADER);
-                break;
-        }
-    }
-
-    //--------- VOLLEY CALLBACKS
-
-    @Override
-    public void onResponse(JSONObject jsonObject) {
-        // int respCode = JsonParseHelper.getRespCode(jsonObject);
-
-        Log.d("DEBUG", jsonObject.toString());
-
-      //  if (respCode == NetworkHelper.SUCCESS_RESP_CODE) {
-        mTempAtmArrayList = JsonParseHelper.getAtmsList(jsonObject);
-
-        if (mTempAtmArrayList.size() > 0 ) {
-            Log.d("DEBUG", "mTempAtmArrayList.size() > 0");
-            //create loader
-           Loader loader = getLoaderManager().initLoader(UPDATE_DB_LOADER, null, this);
-           loader.forceLoad();
-        } else {
-            cancelUpdateAtmList();
-        }
-    }
-
-    @Override
-    public void onErrorResponse(VolleyError volleyError) {
-        Toast.makeText(mContext, getResources().getString(R.string.message_update_failed), Toast.LENGTH_SHORT).show();
-        Log.e("ERROR", volleyError.toString());
-        cancelUpdateAtmList();
-    }
-
-    //------- LOCATION CUSTOM CALLBACKS
-
-    @Override
-    public void onUpdateLocation(LocationPoint locationPoint) {
-        if (locationPoint == null) {
-            Log.d("DEBUG", "Current location IS NULL");
-            mCurrentLocation = null;
+        if (location == null) {
+            Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".updateFragmentUI: Current location IS NULL");
+            mCurrentLocationPoint = null;
             return;
+        } else {
+            Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".updateFragmentUI: Current location: lat " + location.getLatitude() + ", lon " + location.getLongitude());
+            mCurrentLocationPoint = new LocationPoint(location.getLatitude(), location.getLongitude());
         }
-
-        Log.d("DEBUG", "Current location: lat " + locationPoint.getLatitude() + ", lon " + locationPoint.getLongitude());
-        mCurrentLocation = locationPoint;
         updateListView();
+    }
+
+    //--- PROGRESS CALLBACK
+    @Override
+    public void onShowHideProgressBar(final boolean isShow) {
+        final SwipeRefreshLayout swipeRefreshLayout = getSwipeRefreshLayout();
+        swipeRefreshLayout.post(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        if (isShow) {
+                            if (!isRefreshing()) {
+                                startRefresh();
+                            }
+                        } else {
+                            if (isRefreshing()) {
+                                stopRefreshing();
+                            }
+                        }
+                    }
+                }
+        );
+        Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onShowHideProgressBar() : " + (isShow ? "show" : "hide"));
     }
 }
