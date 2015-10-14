@@ -1,6 +1,7 @@
 package com.cdvdev.atmsearcher.fragments;
 
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.cdvdev.atmsearcher.R;
+import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.models.Atm;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -19,10 +21,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 public class AtmMapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String KEY_ATM_OBJECT = "atmsearcher.atm";
     private Atm mAtm;
+    private FragmentListener mFragmentListener;
 
     public static Fragment newInstance(Atm atm) {
         Fragment fragment = new AtmMapFragment();
@@ -30,6 +35,24 @@ public class AtmMapFragment extends Fragment implements OnMapReadyCallback {
         bundle.putSerializable(KEY_ATM_OBJECT, atm);
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    public static Fragment newInstance(ArrayList<Atm> atmArrayList) {
+        Fragment fragment = new AtmMapFragment();
+        //Bundle bundle = new Bundle();
+       // bundle.putSerializable(KEY_ATM_OBJECT, atm);
+        //fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mFragmentListener = (FragmentListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must be implement FragmentListener");
+        }
     }
 
     @Override
@@ -51,6 +74,13 @@ public class AtmMapFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mFragmentListener.onChangeAppBarTitle(R.string.title_map_fragment);
+        mFragmentListener.onSetHomeAsUpEnabled(true);
     }
 
     @Override

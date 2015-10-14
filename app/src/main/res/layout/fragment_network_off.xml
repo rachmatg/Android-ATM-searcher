@@ -16,7 +16,7 @@
         android:contentDescription="@string/message_network_off"/>
 
     <TextView
-        android:id="@+id/tv_netework_off"
+        android:id="@+id/tv_network_off"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/message_network_off"
@@ -30,9 +30,6 @@
         android:layout_height="@dimen/default_elements_height"
         android:gravity="center_vertical|center_horizontal">
 
-        <Button
-            android:text="@string/button_text_repeat"
-            style="@style/ButtonStyle"/>
     </RelativeLayout>
 
 

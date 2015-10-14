@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Поиск банкомата</string>
     <string name="title_detail_fragment">Банкомат</string>
+    <string name="title_map_fragment">Навигация</string>
 
     <string name="action_search">Поиск</string>
     <string name="action_search_hint">Название улицы</string>

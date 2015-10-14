@@ -17,10 +17,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.cdvdev.atmsearcher.R;
-import com.cdvdev.atmsearcher.activities.MainActivity;
 import com.cdvdev.atmsearcher.adapters.AtmListAdapter;
 import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
+import com.cdvdev.atmsearcher.listeners.FabListener;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.listeners.BackPressedListener;
 import com.cdvdev.atmsearcher.listeners.ProgressListener;
@@ -35,7 +35,7 @@ import java.util.Collections;
  */
 public class AtmListFragment
         extends SwipeRefreshBaseFragment
-        implements BackPressedListener, ProgressListener {
+        implements BackPressedListener, ProgressListener, FabListener {
 
     private final static String  KEY_IS_SEARCHVIEW_OPEN = "atmsearcher.issearchviewopen";
     private final static String KEY_SEARCHVIEW_QUERY = "atmsearcher.searchviewquery";
@@ -90,7 +90,6 @@ public class AtmListFragment
                 mFragmentListener.onRefreshData();
             }
         });
-
     }
 
     @Override
@@ -109,7 +108,6 @@ public class AtmListFragment
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onResume: start");
         mFragmentListener.onChangeAppBarTitle(R.string.app_name);
 
         if (mSearchView != null && !mSaveSearchQueryString.equals("") ) {
@@ -120,16 +118,19 @@ public class AtmListFragment
         }
 
         onShowHideProgressBar(mFragmentListener.onGetUpdateProgress());
-     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
+        //setup fab. If SearchView is opened, don`t show FAB
+    //    if (mSearchView != null && !mSearchView.isIconified()) {
+    //        mFragmentListener.onHideFab();
+    //    } else {
+            mFragmentListener.onShowFab(R.drawable.ic_map_white_24dp);
+     //   }
+     }
 
     @Override
     public void onPause() {
         super.onPause();
+        mFragmentListener.onHideFab();
     }
 
     @Override
@@ -214,11 +215,14 @@ public class AtmListFragment
             mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
                 @Override
                 public boolean onClose() {
+                    Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onClose search view");
                     //query all ATM`s list
                     mSearchQueryString = "";
                     mFragmentListener.onSetHomeAsUpEnabled(false);
                     mIsSearchViewOpen = false;
                     updateListView();
+                    //show fab
+                   // mFragmentListener.onShowFab(android.R.drawable.ic_dialog_map);
                     return false;
                 }
             });
@@ -229,6 +233,8 @@ public class AtmListFragment
                 public void onClick(View v) {
                     mFragmentListener.onSetHomeAsUpEnabled(true);
                     mIsSearchViewOpen = true;
+                    //hide fab
+                   // mFragmentListener.onHideFab();
                 }
             });
 
@@ -291,7 +297,6 @@ public class AtmListFragment
         mAtmArrayList.addAll(getAtmArrayList());
         mAdapter.notifyDataSetChanged();
     }
-
     public void updateFragmentUI(Location location) {
 
         if (location == null) {
@@ -326,5 +331,12 @@ public class AtmListFragment
                 }
         );
         Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onShowHideProgressBar() : " + (isShow ? "show" : "hide"));
+    }
+
+    //--- FAB CALLBACK
+
+    @Override
+    public void onFabClick() {
+          mFragmentListener.onViewAtmOnMap(mAtmArrayList);
     }
 }

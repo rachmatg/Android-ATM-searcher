@@ -1,6 +1,9 @@
 package com.cdvdev.atmsearcher.activities;
 
 import android.location.Location;
+import android.os.Build;
+import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -11,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -31,6 +35,7 @@ import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
 import com.cdvdev.atmsearcher.listeners.CustomLocationListener;
+import com.cdvdev.atmsearcher.listeners.FabListener;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.listeners.GoogleApiListener;
 import com.cdvdev.atmsearcher.listeners.BackPressedListener;
@@ -57,7 +62,8 @@ public class MainActivity extends AppCompatActivity implements
                                         CustomLocationListener,
                                         FragmentListener,
                                         VolleyListener,
-                                        LoaderManager.LoaderCallbacks{
+                                        LoaderManager.LoaderCallbacks,
+                                        FloatingActionButton.OnClickListener{
 
     private static final int UPDATE_LOCATION_INTERVAL = 10000; //milliseconds
     private static final int UPDATE_LOCATION_INTERVAL_FASTEST = UPDATE_LOCATION_INTERVAL / 2;
@@ -67,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private FragmentManager mFm;
     private ActionBar mActionBar;
+    private FloatingActionButton mFab;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mCurrentLocation;
@@ -74,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements
     private ArrayList<Atm> mTempAtmArrayList;
     private RequestQueue mRequestQueue;
     private boolean isUpdating = false;
-
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +94,11 @@ public class MainActivity extends AppCompatActivity implements
             setSupportActionBar(toolbar);
         }
         mActionBar = getSupportActionBar();
+
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        if (mFab != null) {
+            mFab.setOnClickListener(this);
+        }
 
         mFm = getSupportFragmentManager();
         Fragment newFragment;
@@ -419,6 +431,22 @@ public class MainActivity extends AppCompatActivity implements
        }
     }
 
+    //--- FAB CALLBACK
+
+    @Override
+    public void onClick(View view) {
+        if (mFab == null) {
+            return;
+        }
+
+        Fragment fragment = mFm.findFragmentById(R.id.main_container);
+        if (fragment != null) {
+            if (fragment instanceof FabListener) {
+                ((FabListener) fragment).onFabClick();
+            }
+        }
+    }
+
     //--- FRAGMENTS CALLBACKS
 
     @Override
@@ -451,6 +479,15 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onViewAtmOnMap(ArrayList<Atm> atmArrayList) {
+        FragmentTransaction ft = mFm.beginTransaction();
+        ft.replace(R.id.main_container, AtmMapFragment.newInstance(atmArrayList))
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack(null);
+        ft.commit();
+    }
+
+    @Override
     public boolean onGetUpdateProgress() {
         return isUpdating;
     }
@@ -458,5 +495,41 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onRefreshData() {
         doUpdateAtms();
+    }
+
+    @Override
+    public void onShowFab(final int srcResId) {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mFab == null) {
+                    return;
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    mFab.setImageDrawable(getApplicationContext().getResources().getDrawable(srcResId, getApplicationContext().getTheme()));
+                } else {
+                    mFab.setImageDrawable(getApplicationContext().getResources().getDrawable(srcResId));
+                }
+                mFab.show();
+            }
+        }, 500);
+    }
+
+    @Override
+    public void onHideFab() {
+         if (mFab == null) {
+             return;
+         }
+       mFab.hide();
+    }
+
+    @Override
+    public void onSetFabListener(View.OnClickListener listener) {
+        if (mFab == null) {
+            return;
+        }
+        if (listener != null) {
+            mFab.setOnClickListener(listener);
+        }
     }
 }
