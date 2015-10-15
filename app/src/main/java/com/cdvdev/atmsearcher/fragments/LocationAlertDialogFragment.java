@@ -37,7 +37,7 @@ public class LocationAlertDialogFragment extends DialogFragment {
         }
         builder.setMessage(message);
         builder.setPositiveButton(
-                R.string.button_location_settings,
+                R.string.button_settings,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

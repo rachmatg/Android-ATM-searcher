@@ -6,7 +6,12 @@
     <string name="action_search">Поиск</string>
     <string name="action_search_hint">Название улицы</string>
 
-    <string name="message_network_off">Включить WiFi или мобильный интернет</string>
+    <string name="message_network_off">Включите WiFi или мобильный интернет</string>
+    <string name="message_error_undefined">Извините, произошла неопределенная ошибка&#8230;</string>
+    <string name="message_error_google_services_default">Ошибка сервисов Google Play</string>
+    <string name="message_error_google_services_missing">Для работы с приложением требуются сервисы Google Play, не установленные на вашем телефоне</string>
+    <string name="message_error_google_services_update_required">Для работы с приложением необходимо обновить сервисы Google Play</string>
+    <string name="message_error_google_services_disabled">Для работы с приложением необходимо включить сервисы Google Play</string>
     <string name="message_update_failed">Ошибка при обновлении</string>
     <string name="message_update_success">Обновление завершено</string>
     <string name="message_update_reset">Обновление прервано</string>
@@ -25,7 +30,9 @@
 
     <!-- buttons -->
     <string name="button_text_repeat">Повторить</string>
-    <string name="button_location_settings">Настройки</string>
+    <string name="button_settings">Настройки</string>
     <string name="button_goto_map">На карте</string>
+    <string name="button_text_update">Обновить</string>
+    <string name="button_text_install">Установить</string>
 
 </resources>

@@ -1,8 +1,10 @@
 package com.cdvdev.atmsearcher.activities;
 
+import android.content.IntentSender;
 import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -27,10 +29,12 @@ import com.android.volley.toolbox.Volley;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.fragments.AtmDetailFragment;
 import com.cdvdev.atmsearcher.fragments.AtmListFragment;
+import com.cdvdev.atmsearcher.fragments.ErrorFragment;
 import com.cdvdev.atmsearcher.fragments.LocationAlertDialogFragment;
 import com.cdvdev.atmsearcher.fragments.AtmMapFragment;
-import com.cdvdev.atmsearcher.fragments.NetworkOffFragment;
+import com.cdvdev.atmsearcher.helpers.CustomIntent;
 import com.cdvdev.atmsearcher.helpers.FragmentsHelper;
+import com.cdvdev.atmsearcher.helpers.GoogleApiErrorsHelper;
 import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
@@ -82,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements
     private RequestQueue mRequestQueue;
     private boolean isUpdating = false;
     private Handler mHandler = new Handler();
+    private boolean mResolvingGoogleApiError = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,15 +114,18 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         if (NetworkHelper.isDeviceOnline(getApplicationContext())) {
-             mGoogleApiClient = initGoogleApiClient();
-             mLocationRequest = initLocationRequest();
-             doUpdateAtms();
-             newFragment = AtmListFragment.newInstance();
+            mGoogleApiClient = initGoogleApiClient();
+            mLocationRequest = initLocationRequest();
+            //newFragment = AtmListFragment.newInstance();
+            //doUpdateAtms();
         } else {
-             newFragment = NetworkOffFragment.newInstance();
+            newFragment = ErrorFragment.newInstance(
+                    getResources().getString(R.string.message_network_off),
+                    new CustomIntent(Settings.ACTION_WIRELESS_SETTINGS),
+                    getResources().getString(R.string.button_settings)
+            );
+            FragmentsHelper.createFragment(mFm, newFragment, false);
         }
-
-        FragmentsHelper.createFragment(mFm, newFragment, false);
 
     }
 
@@ -334,6 +342,9 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
 
+        Fragment newFragment = AtmListFragment.newInstance();
+        FragmentsHelper.createFragment(mFm, newFragment, false);
+        doUpdateAtms();
         startLocationUpdate();
     }
 
@@ -347,7 +358,28 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Toast.makeText(this, "GoogleApiClient connection failed! Code " + connectionResult.getErrorCode(), Toast.LENGTH_SHORT).show();
+
+        int errorCode = connectionResult.getErrorCode();
+
+        if (!mResolvingGoogleApiError) {
+            if (connectionResult.hasResolution()) {
+                try {
+                    mResolvingGoogleApiError = true;
+                    connectionResult.startResolutionForResult(this, 111);
+                } catch (IntentSender.SendIntentException e) {
+                    mGoogleApiClient.connect();
+                }
+            } else {
+                GoogleApiErrorsHelper errorsHelper = new GoogleApiErrorsHelper(this, errorCode);
+                Fragment newFragment = ErrorFragment.newInstance(
+                        errorsHelper.getErrorMessage(),
+                        errorsHelper.getIntent(),
+                        errorsHelper.getButtonText()
+                );
+                FragmentsHelper.createFragment(mFm, newFragment, false);
+                mResolvingGoogleApiError = true;
+            }
+        }
     }
 
     //----- LOCATION CUSTOM CALLBACKS
