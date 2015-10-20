@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- main colors -->
-    <item name="primary" type="color">#46B19B</item>
-    <item name="primary_dark" type="color">#24A389</item>
-    <item name="primary_light" type="color">#68BFAD</item>
-    <item name="accent" type="color">#F6CA41</item>
+    <item name="primary" type="color">#009688</item>
+    <item name="primary_dark" type="color">#00796B</item>
+    <item name="primary_light" type="color">#B2DFDB</item>
+    <item name="accent" type="color">#FFC107</item>
     <item name="accent_dark" type="color">#FFB300</item>
     <item name="text_icon" type="color">#FFFFFF</item>
     <item name="text_primary" type="color">#212121</item>
