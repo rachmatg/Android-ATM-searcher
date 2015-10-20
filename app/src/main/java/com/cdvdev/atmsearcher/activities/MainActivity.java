@@ -273,6 +273,11 @@ public class MainActivity extends AppCompatActivity implements
      * @param location -Location
      */
     private void updateIU(Location location) {
+       if (mFm.getFragments() == null) {
+            return;
+        }
+
+
         for (Fragment fragment : mFm.getFragments()) {
             if (fragment instanceof AtmListFragment) {
                 ((AtmListFragment) fragment).updateFragmentUI(location);
