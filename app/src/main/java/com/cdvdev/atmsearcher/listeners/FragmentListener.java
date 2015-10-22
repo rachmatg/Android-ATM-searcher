@@ -14,10 +14,8 @@ public interface FragmentListener {
     void onChangeAppBarTitle(int res);
     void onSetHomeAsUpEnabled(boolean isEnabled);
     void onViewAtmOnMap(Atm atm);
-    void onViewAtmOnMap(ArrayList<Atm> atmArrayList);
     boolean onGetUpdateProgress();
     void onRefreshData();
     void onShowFab(int srcResId);
     void onHideFab();
-    void onSetFabListener(View.OnClickListener listener);
 }

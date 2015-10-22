@@ -2,46 +2,53 @@ package com.cdvdev.atmsearcher.fragments;
 
 
 import android.app.Activity;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.cdvdev.atmsearcher.R;
+import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
+import com.cdvdev.atmsearcher.helpers.Utils;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.models.Atm;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
-public class AtmMapFragment extends Fragment implements OnMapReadyCallback {
+public class AtmMapFragment extends Fragment implements OnMapReadyCallback,
+                                                                                                           GoogleMap.OnMarkerClickListener,
+                                                                                                           GoogleMap.OnCameraChangeListener,
+                                                                                                           GoogleMap.OnMyLocationButtonClickListener,
+GoogleMap.OnMyLocationChangeListener{
 
     private static final String KEY_ATM_OBJECT = "atmsearcher.atm";
-    private Atm mAtm;
+    private Atm mSelectedAtm;
+    private ArrayList<Atm> mAtmArrayList;
     private FragmentListener mFragmentListener;
+    private GoogleMap mGoogleMap;
+    private boolean mIsNeedMovedCameraToLocation = false;
 
-    public static Fragment newInstance(Atm atm) {
+    public static Fragment newInstance(Atm selectedAtm) {
         Fragment fragment = new AtmMapFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(KEY_ATM_OBJECT, atm);
-        fragment.setArguments(bundle);
-        return fragment;
-    }
 
-    public static Fragment newInstance(ArrayList<Atm> atmArrayList) {
-        Fragment fragment = new AtmMapFragment();
-        //Bundle bundle = new Bundle();
-       // bundle.putSerializable(KEY_ATM_OBJECT, atm);
-        //fragment.setArguments(bundle);
+        if (selectedAtm != null) {
+            bundle.putSerializable(KEY_ATM_OBJECT, selectedAtm);
+        }
+        fragment.setArguments(bundle);
         return fragment;
     }
 
@@ -58,9 +65,16 @@ public class AtmMapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mAtm = (Atm) getArguments().getSerializable(KEY_ATM_OBJECT);
+
+        mAtmArrayList = DatabaseHelper.getInstance(getContext()).getAllAtms();
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            if (bundle.containsKey(KEY_ATM_OBJECT)) {
+                mSelectedAtm = (Atm) getArguments().getSerializable(KEY_ATM_OBJECT);
+            }
         }
+
         setRetainInstance(true);
         setHasOptionsMenu(true);
     }
@@ -97,24 +111,98 @@ public class AtmMapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        if (mAtm != null) {
-            LatLng atmLocation = new LatLng(mAtm.getLocation().getLatitude(), mAtm.getLocation().getLongitude());
+        Atm atm;
+        LatLng atmPosition;
+        LatLng cameraPosition = null;
+        Marker marker;
 
-            googleMap.setMyLocationEnabled(true);
-            Marker marker = googleMap.addMarker(
-                    new MarkerOptions()
-                            .position(atmLocation)
-                            .title(mAtm.getName() + ", " + mAtm.getBankName())
-                            .snippet(mAtm.getAddress())
+        mGoogleMap = googleMap;
 
-            );
-            //show marker always
-            marker.showInfoWindow();
+        if (mAtmArrayList != null && mAtmArrayList.size() > 0) {
+            mIsNeedMovedCameraToLocation = (mSelectedAtm == null);
 
+            for (int i = 0; i < mAtmArrayList.size(); i++) {
+                Log.d(Utils.TAG_DEBUG_LOG, mAtmArrayList.get(i).getName());
+                atm = mAtmArrayList.get(i);
+
+               //create marker for atm
+                atmPosition = new LatLng(atm.getLocation().getLatitude(), atm.getLocation().getLongitude());
+                marker = mGoogleMap.addMarker(
+                        new MarkerOptions()
+                                .position(atmPosition)
+                                .title(atm.getName() + ", " + atm.getBankName())
+                                .snippet(atm.getAddress())
+                );
+
+                //show info window for selected ATM
+                if (mSelectedAtm != null) {
+                    if (mSelectedAtm.getName().equals(atm.getName())) {
+                        marker.showInfoWindow();
+                        cameraPosition = new LatLng(atm.getLocation().getLatitude(), atm.getLocation().getLongitude());
+                    }
+                }
+            }
+
+        }
+
+        if (cameraPosition != null) {
             //move camera
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(atmLocation, 10));
+            mGoogleMap.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(cameraPosition, 10)
+            );
             //animate zoom in camera
-            googleMap.animateCamera(CameraUpdateFactory.zoomTo(15), 3000, null);
+            mGoogleMap.animateCamera(
+                    CameraUpdateFactory.zoomTo(15),
+                    2000,
+                    null
+            );
+        }
+
+        //show button "my location"
+        mGoogleMap.setMyLocationEnabled(true);
+        //show zoom controls
+        mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
+
+        mGoogleMap.setOnMarkerClickListener(this);
+        mGoogleMap.setOnMyLocationButtonClickListener(this);
+        mGoogleMap.setOnMyLocationChangeListener(this);
+        mGoogleMap.setOnCameraChangeListener(this);
+    }
+
+    //--- GOOLGE MAP CALLBACKS
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        //don`t moved camera to user location
+       mIsNeedMovedCameraToLocation = false;
+       return false;
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        mIsNeedMovedCameraToLocation = true;
+        return false;
+    }
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+        //don`t moved camera to user location
+        mIsNeedMovedCameraToLocation = false;
+    }
+
+    @Override
+    public void onMyLocationChange(Location location) {
+        if (!mIsNeedMovedCameraToLocation) {
+            return;
+        }
+
+        //when changed location
+        if (mGoogleMap != null && location != null) {
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(location.getLatitude(), location.getLongitude()))
+                    .zoom(15)
+                    .build();
+            mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
     }
 }

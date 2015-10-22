@@ -337,6 +337,6 @@ public class AtmListFragment
 
     @Override
     public void onFabClick() {
-          mFragmentListener.onViewAtmOnMap(mAtmArrayList);
+          mFragmentListener.onViewAtmOnMap(null);
     }
 }

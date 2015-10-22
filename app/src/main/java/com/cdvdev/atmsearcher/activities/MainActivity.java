@@ -276,12 +276,10 @@ public class MainActivity extends AppCompatActivity implements
        if (mFm.getFragments() == null) {
             return;
         }
-
-
-        for (Fragment fragment : mFm.getFragments()) {
+        Fragment fragment = mFm.findFragmentById(R.id.main_container);
+        if (fragment != null) {
             if (fragment instanceof AtmListFragment) {
                 ((AtmListFragment) fragment).updateFragmentUI(location);
-                break;
             }
         }
     }
@@ -391,6 +389,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLocationChanged(Location location) {
+        //method called every time, even when location don`t changed. WTF??
         mCurrentLocation = location;
         updateIU(mCurrentLocation);
     }
@@ -516,15 +515,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onViewAtmOnMap(ArrayList<Atm> atmArrayList) {
-        FragmentTransaction ft = mFm.beginTransaction();
-        ft.replace(R.id.main_container, AtmMapFragment.newInstance(atmArrayList))
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack(null);
-        ft.commit();
-    }
-
-    @Override
     public boolean onGetUpdateProgress() {
         return isUpdating;
     }
@@ -558,15 +548,5 @@ public class MainActivity extends AppCompatActivity implements
              return;
          }
        mFab.hide();
-    }
-
-    @Override
-    public void onSetFabListener(View.OnClickListener listener) {
-        if (mFab == null) {
-            return;
-        }
-        if (listener != null) {
-            mFab.setOnClickListener(listener);
-        }
     }
 }
