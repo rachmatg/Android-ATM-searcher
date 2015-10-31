@@ -20,6 +20,7 @@
     <string name="message_need_on_gps">Для более точного поиска ближайшего банкомата включите определение местоположения по GPS</string>
     <string name="message_need_on_location">Для поиска ближайшего банкомата включите определение местоположения</string>
     <string name="label_kilometers">км</string>
+    <string name="message_splash">Ваш помощник в поиске банкомата</string>
 
     <!-- icons -->
     <string name="ic_description_place">Показать на карте</string>
