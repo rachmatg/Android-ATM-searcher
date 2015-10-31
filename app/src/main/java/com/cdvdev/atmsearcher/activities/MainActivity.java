@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        Toast.makeText(this, "GoogleApiClient connected!", Toast.LENGTH_SHORT).show();
+     //   Toast.makeText(this, "GoogleApiClient connected!", Toast.LENGTH_SHORT).show();
         if (mCurrentLocation == null) {
             //get last location
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -347,8 +347,11 @@ public class MainActivity extends AppCompatActivity implements
 
         Fragment newFragment = AtmListFragment.newInstance();
         FragmentsHelper.createFragment(mFm, newFragment, false);
-        doUpdateAtms();
         startLocationUpdate();
+        //start first update only if last update be more than certain time
+        if (Utils.isNeedToUpdate(this)) {
+            doUpdateAtms();
+        }
     }
 
     @Override
@@ -463,6 +466,8 @@ public class MainActivity extends AppCompatActivity implements
                hideProgress(true);
                Toast.makeText(this, getResources().getString(R.string.message_update_success), Toast.LENGTH_SHORT).show();
                getSupportLoaderManager().destroyLoader(UPDATE_DB_LOADER_ID);
+               //save datetime of success update
+               Utils.saveLastUpdateTime(this);
                break;
        }
     }
