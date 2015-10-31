@@ -1,17 +1,18 @@
 package com.cdvdev.atmsearcher.adapters;
 
 import android.app.Activity;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cdvdev.atmsearcher.R;
+import com.cdvdev.atmsearcher.fragments.AtmMapFragment;
 import com.cdvdev.atmsearcher.models.Atm;
 
 import java.math.BigDecimal;
@@ -61,14 +62,15 @@ public class AtmListAdapter extends ArrayAdapter<Atm> {
             showPlace.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    double lat = atm.getLocation().getLatitude();
-                    double lon = atm.getLocation().getLongitude();
-
-                    Toast.makeText(mContext, "Lat " + lat + " Lon " + lon, Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent();
-                    intent.setAction(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse("geo:" + lat + "," + lon + "?q=" + lat + "," + lon + "(" + atm.getName() + ")"));
-                    mContext.startActivity(intent);
+                    FragmentManager fm =((FragmentActivity)mContext).getSupportFragmentManager();
+                    FragmentTransaction ft = fm.beginTransaction();
+                    ft.replace(
+                            R.id.main_container,
+                            AtmMapFragment.newInstance(atm)
+                    )
+                            .setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                            .addToBackStack(null);
+                    ft.commit();
                 }
             });
         }

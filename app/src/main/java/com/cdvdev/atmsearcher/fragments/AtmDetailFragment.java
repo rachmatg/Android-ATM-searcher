@@ -83,7 +83,7 @@ public class AtmDetailFragment extends Fragment implements FabListener {
         mFragmentListener.onSetHomeAsUpEnabled(true);
 
         //setup fab
-        mFragmentListener.onShowFab(R.drawable.ic_directions_white_24dp);
+        mFragmentListener.onShowFab(R.drawable.ic_place_white_24dp);
     }
 
     @Override
