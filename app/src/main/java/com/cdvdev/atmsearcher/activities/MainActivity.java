@@ -103,7 +103,6 @@ public class MainActivity extends AppCompatActivity implements
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         if (mFab != null) {
             mFab.setOnClickListener(this);
-            mFab.hide();
         }
 
         mFm = getSupportFragmentManager();
