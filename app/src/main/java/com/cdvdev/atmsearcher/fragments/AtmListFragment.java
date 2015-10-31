@@ -39,6 +39,7 @@ public class AtmListFragment
 
     private final static String  KEY_IS_SEARCHVIEW_OPEN = "atmsearcher.issearchviewopen";
     private final static String KEY_SEARCHVIEW_QUERY = "atmsearcher.searchviewquery";
+    private final static int FAB_ICON = R.drawable.ic_map_white_24dp;
 
     private ArrayList<Atm> mAtmArrayList;
     private ArrayAdapter<Atm> mAdapter;
@@ -110,27 +111,23 @@ public class AtmListFragment
         super.onResume();
         mFragmentListener.onChangeAppBarTitle(R.string.app_name);
 
-        if (mSearchView != null && !mSaveSearchQueryString.equals("") ) {
+        if (mSearchView != null && !mSaveSearchQueryString.equals("")) {
             mSearchView.setIconified(false);
             mSearchView.setQuery(mSaveSearchQueryString, true);
         } else if (!mIsSearchViewOpen) {
             mFragmentListener.onSetHomeAsUpEnabled(false);
         }
 
-        onShowHideProgressBar(mFragmentListener.onGetUpdateProgress());
+        //show FAB when list is not empty
+        showFab(mAtmArrayList.size() > 0);
 
-        //setup fab. If SearchView is opened, don`t show FAB
-    //    if (mSearchView != null && !mSearchView.isIconified()) {
-    //        mFragmentListener.onHideFab();
-    //    } else {
-            mFragmentListener.onShowFab(R.drawable.ic_map_white_24dp);
-     //   }
-     }
+        onShowHideProgressBar(mFragmentListener.onGetUpdateProgress());
+    }
 
     @Override
     public void onPause() {
         super.onPause();
-        mFragmentListener.onHideFab();
+        showFab(false);
     }
 
     @Override
@@ -195,7 +192,6 @@ public class AtmListFragment
                             //if search text is not empty
                             if (!query.equals("")) {
                                 mSearchView.clearFocus();
-                                //Toast.makeText(getActivity(), "Query: " + query, Toast.LENGTH_SHORT).show();
                                 //query atms
                                 mSearchQueryString = query;
                                 updateListView();
@@ -220,9 +216,6 @@ public class AtmListFragment
                     mSearchQueryString = "";
                     mFragmentListener.onSetHomeAsUpEnabled(false);
                     mIsSearchViewOpen = false;
-                    updateListView();
-                    //show fab
-                   // mFragmentListener.onShowFab(android.R.drawable.ic_dialog_map);
                     return false;
                 }
             });
@@ -233,8 +226,6 @@ public class AtmListFragment
                 public void onClick(View v) {
                     mFragmentListener.onSetHomeAsUpEnabled(true);
                     mIsSearchViewOpen = true;
-                    //hide fab
-                   // mFragmentListener.onHideFab();
                 }
             });
 
@@ -296,7 +287,26 @@ public class AtmListFragment
         mAtmArrayList.clear();
         mAtmArrayList.addAll(getAtmArrayList());
         mAdapter.notifyDataSetChanged();
+        //show FAB if list is not empty
+        showFab(mAtmArrayList.size() > 0);
     }
+
+    /**
+     * Helper method for hide or show FAB for AtmList
+     * @param isShow - true - show FAB
+     */
+    private void showFab(boolean isShow){
+         if (isShow) {
+             mFragmentListener.onShowFab(FAB_ICON);
+         } else {
+             mFragmentListener.onHideFab();
+         }
+    }
+
+    /**
+     * Method for call update fragment  UI from Activity
+     * @param location
+     */
     public void updateFragmentUI(Location location) {
 
         if (location == null) {
