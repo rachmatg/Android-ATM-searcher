@@ -35,11 +35,14 @@ public class AtmMapFragment extends Fragment implements OnMapReadyCallback,
 GoogleMap.OnMyLocationChangeListener{
 
     private static final String KEY_ATM_OBJECT = "atmsearcher.atm";
+    private static final int DEFAULT_CAMERA_ZOOM = 15;
+
     private Atm mSelectedAtm;
     private ArrayList<Atm> mAtmArrayList;
     private FragmentListener mFragmentListener;
     private GoogleMap mGoogleMap;
-    private boolean mIsNeedMovedCameraToLocation = false;
+    private boolean mIsNeedMovedCameraToLocation = true;
+    private CameraPosition mSavedCameraPosition;
 
     public static Fragment newInstance(Atm selectedAtm) {
         Fragment fragment = new AtmMapFragment();
@@ -95,6 +98,7 @@ GoogleMap.OnMyLocationChangeListener{
         super.onResume();
         mFragmentListener.onChangeAppBarTitle(R.string.title_map_fragment);
         mFragmentListener.onSetHomeAsUpEnabled(true);
+        mFragmentListener.onHideFab();
     }
 
     @Override
@@ -113,16 +117,27 @@ GoogleMap.OnMyLocationChangeListener{
 
         Atm atm;
         LatLng atmPosition;
-        LatLng cameraPosition = null;
+        CameraPosition cameraPosition = null;
         Marker marker;
 
         mGoogleMap = googleMap;
+
+        //show button "my location"
+        mGoogleMap.setMyLocationEnabled(true);
+        //show zoom controls
+        mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
+
+        mGoogleMap.setOnMarkerClickListener(this);
+        mGoogleMap.setOnMyLocationButtonClickListener(this);
+        mGoogleMap.setOnMyLocationChangeListener(this);
+        mGoogleMap.setOnCameraChangeListener(this);
+
 
         if (mAtmArrayList != null && mAtmArrayList.size() > 0) {
             mIsNeedMovedCameraToLocation = (mSelectedAtm == null);
 
             for (int i = 0; i < mAtmArrayList.size(); i++) {
-                Log.d(Utils.TAG_DEBUG_LOG, mAtmArrayList.get(i).getName());
+               // Log.d(Utils.TAG_DEBUG_LOG, mAtmArrayList.get(i).getName());
                 atm = mAtmArrayList.get(i);
 
                //create marker for atm
@@ -138,7 +153,15 @@ GoogleMap.OnMyLocationChangeListener{
                 if (mSelectedAtm != null) {
                     if (mSelectedAtm.getName().equals(atm.getName())) {
                         marker.showInfoWindow();
-                        cameraPosition = new LatLng(atm.getLocation().getLatitude(), atm.getLocation().getLongitude());
+                        cameraPosition = new CameraPosition.Builder()
+                                .target(new LatLng(
+                                        mSelectedAtm.getLocation().getLatitude(),
+                                        mSelectedAtm.getLocation().getLongitude()
+                                ))
+                                .zoom(mSavedCameraPosition != null ? mSavedCameraPosition.zoom : DEFAULT_CAMERA_ZOOM)
+                                .build();
+
+                        mIsNeedMovedCameraToLocation = false;
                     }
                 }
             }
@@ -148,25 +171,19 @@ GoogleMap.OnMyLocationChangeListener{
         if (cameraPosition != null) {
             //move camera
             mGoogleMap.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(cameraPosition, 10)
+                    CameraUpdateFactory.newLatLngZoom(cameraPosition.target, 10)
             );
             //animate zoom in camera
             mGoogleMap.animateCamera(
-                    CameraUpdateFactory.zoomTo(15),
+                    CameraUpdateFactory.zoomTo(cameraPosition.zoom),
                     2000,
                     null
             );
+
+            //save current camera position
+            mSavedCameraPosition = cameraPosition;
         }
 
-        //show button "my location"
-        mGoogleMap.setMyLocationEnabled(true);
-        //show zoom controls
-        mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
-
-        mGoogleMap.setOnMarkerClickListener(this);
-        mGoogleMap.setOnMyLocationButtonClickListener(this);
-        mGoogleMap.setOnMyLocationChangeListener(this);
-        mGoogleMap.setOnCameraChangeListener(this);
     }
 
     //--- GOOLGE MAP CALLBACKS
@@ -180,14 +197,18 @@ GoogleMap.OnMyLocationChangeListener{
 
     @Override
     public boolean onMyLocationButtonClick() {
+        //need to moved camera to user location
         mIsNeedMovedCameraToLocation = true;
         return false;
     }
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-        //don`t moved camera to user location
-        mIsNeedMovedCameraToLocation = false;
+        if (mSavedCameraPosition != null) {
+            //don`t moved camera to user location if user change camera position
+            mIsNeedMovedCameraToLocation = false;
+            mSavedCameraPosition = cameraPosition;
+        }
     }
 
     @Override
@@ -200,9 +221,12 @@ GoogleMap.OnMyLocationChangeListener{
         if (mGoogleMap != null && location != null) {
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                    .zoom(15)
+                    .zoom(mSavedCameraPosition != null ? mSavedCameraPosition.zoom : DEFAULT_CAMERA_ZOOM)
                     .build();
             mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+            mSavedCameraPosition = cameraPosition;
         }
+
     }
 }
