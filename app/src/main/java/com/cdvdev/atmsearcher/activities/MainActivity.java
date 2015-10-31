@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         if (mFab != null) {
             mFab.setOnClickListener(this);
+            mFab.hide();
         }
 
         mFm = getSupportFragmentManager();
@@ -116,8 +117,6 @@ public class MainActivity extends AppCompatActivity implements
         if (NetworkHelper.isDeviceOnline(getApplicationContext())) {
             mGoogleApiClient = initGoogleApiClient();
             mLocationRequest = initLocationRequest();
-            //newFragment = AtmListFragment.newInstance();
-            //doUpdateAtms();
         } else {
             newFragment = ErrorFragment.newInstance(
                     getResources().getString(R.string.message_network_off),

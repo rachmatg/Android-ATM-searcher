@@ -39,11 +39,7 @@ public class GoogleApiErrorsHelper {
         switch (mErrorCode) {
             case 1:
             case 2:
-                try {
-                    return new CustomIntent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.gms"));
-                } catch (ActivityNotFoundException e) {
-                    return new CustomIntent(Intent.ACTION_VIEW, Uri.parse("market://play.google.com/store/apps/details?id=com.google.android.gms"));
-                }
+                    return new CustomIntent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.gms"));
             default:
                 return null;
         }
