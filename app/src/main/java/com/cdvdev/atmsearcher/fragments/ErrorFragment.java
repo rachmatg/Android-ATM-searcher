@@ -14,9 +14,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cdvdev.atmsearcher.App;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.helpers.CustomIntent;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
+import com.google.android.gms.analytics.HitBuilders;
 
 public class ErrorFragment extends Fragment {
 
@@ -59,6 +61,20 @@ public class ErrorFragment extends Fragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must be implemented FragmentListener");
         }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //analytics
+        App.sTracker.setScreenName("Fragment Error");
+        App.sTracker.send(
+                new HitBuilders.EventBuilder()
+                        .setCategory(App.sGACategoryUX)
+                        .setLabel(App.sGALabelErrors)
+                        .setAction((String) getArguments().get(KEY_ERROR_TEXT))
+                        .build()
+        );
     }
 
     @Nullable

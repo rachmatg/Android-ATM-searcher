@@ -9,7 +9,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+import com.cdvdev.atmsearcher.App;
 import com.cdvdev.atmsearcher.R;
+import com.google.android.gms.analytics.HitBuilders;
 
 public class LocationAlertDialogFragment extends DialogFragment {
 
@@ -23,6 +25,19 @@ public class LocationAlertDialogFragment extends DialogFragment {
         bundle.putInt(KEY_MESSAGE, message);
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //analytics
+        App.sTracker.setScreenName("Location Alert dialog");
+        App.sTracker.send(
+                new HitBuilders.EventBuilder()
+                        .setCategory(App.sGACategoryUX)
+                        .setAction("View location alert dialog")
+                        .build()
+        );
     }
 
     @NonNull

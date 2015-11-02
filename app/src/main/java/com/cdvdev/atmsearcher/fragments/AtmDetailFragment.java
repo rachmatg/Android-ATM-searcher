@@ -10,10 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.cdvdev.atmsearcher.App;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.listeners.FabListener;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.models.Atm;
+import com.google.android.gms.analytics.HitBuilders;
 
 /**
  * Fragment class for ATM detail view
@@ -49,6 +51,15 @@ public class AtmDetailFragment extends Fragment implements FabListener {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         setHasOptionsMenu(true);
+
+        //analytics
+        App.sTracker.setScreenName("Fragment AtmDetail");
+        App.sTracker.send(
+                new HitBuilders.EventBuilder()
+                        .setCategory(App.sGACategoryUX)
+                        .setAction("View ATM detail info")
+                        .build()
+        );
     }
 
     @Nullable

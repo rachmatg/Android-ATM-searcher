@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.cdvdev.atmsearcher.App;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.adapters.AtmListAdapter;
 import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
@@ -26,6 +27,7 @@ import com.cdvdev.atmsearcher.listeners.BackPressedListener;
 import com.cdvdev.atmsearcher.listeners.ProgressListener;
 import com.cdvdev.atmsearcher.models.Atm;
 import com.cdvdev.atmsearcher.models.LocationPoint;
+import com.google.android.gms.analytics.HitBuilders;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,6 +93,15 @@ public class AtmListFragment
                 mFragmentListener.onRefreshData();
             }
         });
+
+        //analytics
+        App.sTracker.setScreenName("Fragment AtmsList");
+        App.sTracker.send(
+                new HitBuilders.EventBuilder()
+                        .setCategory(App.sGACategoryUX)
+                        .setAction("View ATMs list")
+                        .build()
+        );
     }
 
     @Override
@@ -267,6 +278,15 @@ public class AtmListFragment
     public void onListItemClick(ListView l, View v, int position, long id) {
         Atm atm = ((AtmListAdapter) getListAdapter()).getItem(position);
         mFragmentListener.onAtmListItemSelected(atm);
+
+        //analytics
+        App.sTracker.setScreenName("Fragment AtmsList");
+        App.sTracker.send(
+                new HitBuilders.EventBuilder()
+                        .setCategory(App.sGACategoryUX)
+                        .setAction("Click list item: " + atm.getBankName())
+                        .build()
+        );
     }
 
     /**

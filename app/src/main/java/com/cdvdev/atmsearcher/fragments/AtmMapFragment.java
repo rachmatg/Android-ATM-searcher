@@ -12,11 +12,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.cdvdev.atmsearcher.App;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.models.Atm;
+import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -80,6 +82,15 @@ GoogleMap.OnMyLocationChangeListener{
 
         setRetainInstance(true);
         setHasOptionsMenu(true);
+
+        //analytics
+        App.sTracker.setScreenName("Fragment AtmMap");
+        App.sTracker.send(
+                new HitBuilders.EventBuilder()
+                        .setCategory(App.sGACategoryUX)
+                        .setAction( mSelectedAtm != null ? "View single ATM on map" : "View all ATMs on map")
+                        .build()
+        );
     }
 
     @Nullable

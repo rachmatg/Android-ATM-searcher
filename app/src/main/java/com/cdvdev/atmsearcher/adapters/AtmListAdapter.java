@@ -11,9 +11,11 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.cdvdev.atmsearcher.App;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.fragments.AtmMapFragment;
 import com.cdvdev.atmsearcher.models.Atm;
+import com.google.android.gms.analytics.HitBuilders;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -71,6 +73,15 @@ public class AtmListAdapter extends ArrayAdapter<Atm> {
                             .setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                             .addToBackStack(null);
                     ft.commit();
+
+                    //analytics
+                    App.sTracker.setScreenName("Fragment AtmsList");
+                    App.sTracker.send(
+                            new HitBuilders.EventBuilder()
+                                    .setCategory(App.sGACategoryUX)
+                                    .setAction("Click list item icon: " + atm.getBankName())
+                                    .build()
+                    );
                 }
             });
         }
