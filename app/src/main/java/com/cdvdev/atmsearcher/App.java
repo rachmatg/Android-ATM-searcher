@@ -1,7 +1,6 @@
 package com.cdvdev.atmsearcher;
 
 import android.app.Application;
-
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
 
@@ -22,8 +21,8 @@ public class App extends Application {
 
         sAnalytics = GoogleAnalytics.getInstance(this);
         sAnalytics.setLocalDispatchPeriod(GA_DISPATCH_PERIOD);
-        //false - don`t send statistics while debug app
-        sAnalytics.setDryRun(!BuildConfig.DEBUG);
+        //true - don`t send statistics while debug app
+        sAnalytics.setDryRun(BuildConfig.DEBUG);
 
         sTracker = sAnalytics.newTracker(GA_TRACKER_ID);
         sTracker.enableExceptionReporting(true);
