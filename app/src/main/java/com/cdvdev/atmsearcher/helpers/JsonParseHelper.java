@@ -8,19 +8,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class JsonParseHelper {
 
-    private static final String KEY_ATMS_ARRAY = "results";
+    private static final String KEY_ATMS_ARRAY = "atms";
     private static final String KEY_BANK_NAME = "bank_name";
     private static final String KEY_ATM_NAME = "name";
     private static final String KEY_ATM_COUNTRY = "country";
-    private static final String KEY_ATM_CITY_ID = "city_id";
-    private static final String KEY_ATM_CITY_NAME = "city_name";
+    private static final String KEY_ATM_CITY_NAME = "city";
     private static final String KEY_ATM_ADDRESS = "address";
     private static final String KEY_ATM_WORKTIME = "worktime";
-    private static final String KEY_ATM_LOCATION = "location";
     private static final String KEY_ATM_LATITUDE = "latitude";
     private static final String KEY_ATM_LONGITUDE = "longitude";
 
@@ -44,15 +41,14 @@ public class JsonParseHelper {
 
                 atmJsonObject = array.getJSONObject(i);
                 atm = new Atm();
-                atm.setBankName(atmJsonObject.getString(KEY_BANK_NAME));
-                atm.setName(atmJsonObject.getString(KEY_ATM_NAME));
-                atm.setCountry(atmJsonObject.getString(KEY_ATM_COUNTRY));
-                atm.setCityId(atmJsonObject.getInt(KEY_ATM_CITY_ID));
-                atm.setCity(atmJsonObject.getString(KEY_ATM_CITY_NAME));
-                atm.setAddress(atmJsonObject.getString(KEY_ATM_ADDRESS));
-                atm.setWorktime(atmJsonObject.getString(KEY_ATM_WORKTIME));
-                latitude = atmJsonObject.getJSONObject(KEY_ATM_LOCATION).getDouble(KEY_ATM_LATITUDE);
-                longitude = atmJsonObject.getJSONObject(KEY_ATM_LOCATION).getDouble(KEY_ATM_LONGITUDE);
+                atm.setBankName(atmJsonObject.has(KEY_BANK_NAME) ? atmJsonObject.getString(KEY_BANK_NAME) : "");
+                atm.setName(atmJsonObject.has(KEY_ATM_NAME) ? atmJsonObject.getString(KEY_ATM_NAME) : "");
+                atm.setCountry(atmJsonObject.has(KEY_ATM_COUNTRY) ? atmJsonObject.getString(KEY_ATM_COUNTRY) : "");
+                atm.setCity(atmJsonObject.has(KEY_ATM_CITY_NAME) ? atmJsonObject.getString(KEY_ATM_CITY_NAME) : "");
+                atm.setAddress(atmJsonObject.has(KEY_ATM_ADDRESS) ? atmJsonObject.getString(KEY_ATM_ADDRESS) : "");
+                atm.setWorktime(atmJsonObject.has(KEY_ATM_WORKTIME) ? atmJsonObject.getString(KEY_ATM_WORKTIME) : "");
+                latitude = atmJsonObject.has(KEY_ATM_LATITUDE) ? atmJsonObject.getDouble(KEY_ATM_LATITUDE) : 0;
+                longitude = atmJsonObject.has(KEY_ATM_LONGITUDE) ? atmJsonObject.getDouble(KEY_ATM_LONGITUDE) : 0;
                 atm.setLocation(new LocationPoint(latitude,longitude));
                 atms.add(atm);
 

@@ -7,6 +7,8 @@ import android.net.NetworkInfo;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.cdvdev.atmsearcher.App;
+import com.cdvdev.atmsearcher.BuildConfig;
 
 import org.json.JSONObject;
 
@@ -16,11 +18,13 @@ import java.util.HashMap;
  * Class for working with network
  */
 public class NetworkHelper {
-
+/*
     public static final String PARSE_API_VERSION = "1";
     public static final String PARSE_APPLICATION_ID = "shwbK8hzXFEK3CDQO5hJ2Sy1pz6asmo7ZqRqVJKA";
     public static final String PARSE_API_KEY = "mlmog7WlQUB2KbNbWMRXb918rruarYDs6Q0nmfMY";
     public static final String ATMS_URL = "https://api.parse.com/" + PARSE_API_VERSION + "/classes/atms_list";
+    */
+    public static final String ATMS_URL = BuildConfig.DEBUG ?  "http://192.168.56.1:8080/atmsearcher/getatms" : "http://178.62.116.93:8080/atmsearcher/getatms";
     public static final int WAITING_ANSWER_TIMEOUT = 10000;
 
 
@@ -43,8 +47,8 @@ public class NetworkHelper {
      */
     public static HashMap<String, String> getRequestHeaders(){
         HashMap<String, String> headers = new HashMap<>();
-        headers.put("X-Parse-Application-Id", PARSE_APPLICATION_ID);
-        headers.put("X-Parse-REST-API-Key", PARSE_API_KEY);
+      //  headers.put("X-Parse-Application-Id", PARSE_APPLICATION_ID);
+      //  headers.put("X-Parse-REST-API-Key", PARSE_API_KEY);
         return headers;
     }
 

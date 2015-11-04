@@ -10,6 +10,7 @@ import android.util.Log;
 import com.cdvdev.atmsearcher.models.Atm;
 import com.cdvdev.atmsearcher.models.LocationPoint;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -18,15 +19,14 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     final static String DB_NAME = "atm.searcher";
-    final static int DB_VERSION = 1;
+    final static int DB_VERSION =2;
     final String TABLE_ATMS = "atms";
 
     final String COLUMN_ATM_ID = "_id";
     final String COLUMN_BANK_NAME = "bank_name";
-    final String COLUMN_ATM_NAME = "name";
+    final String COLUMN_ATM_NAME = "atm_name";
     final String COLUMN_ATM_COUNTRY = "country";
-    final String COLUMN_ATM_CITY_ID = "city_id";
-    final String COLUMN_ATM_CITY = "city";
+    final String COLUMN_ATM_CITY = "city_name";
     final String COLUMN_ATM_ADDRESS = "address";
     final String COLUMN_ATM_WORKTIME = "worktime";
     final String COLUMN_ATM_LATITUDE = "latitude";
@@ -46,16 +46,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
+
+    private void dropTables(SQLiteDatabase db) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ATMS);
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
-
         db.execSQL(
                 "CREATE TABLE " + TABLE_ATMS + " (" +
                         COLUMN_ATM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         COLUMN_BANK_NAME + " TEXT, " +
                         COLUMN_ATM_NAME + " TEXT, " +
                         COLUMN_ATM_COUNTRY + " TEXT, " +
-                        COLUMN_ATM_CITY_ID + " INTEGER," +
                         COLUMN_ATM_CITY + " TEXT, " +
                         COLUMN_ATM_ADDRESS + " TEXT, " +
                         COLUMN_ATM_WORKTIME + " TEXT, " +
@@ -67,7 +70,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onUpgrade()");
+        dropTables(db);
+        onCreate(db);
     }
 
     /**
@@ -76,7 +81,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public  void updateAtms(ArrayList<Atm> atms) {
 
         try {
-            Log.d(Utils.TAG_DEBUG_LOG, "start insert/update");
 
             SQLiteDatabase db = getWritableDatabase();
             Atm atm;
@@ -97,7 +101,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 cv.put(COLUMN_BANK_NAME, atm.getBankName());
                 cv.put(COLUMN_ATM_NAME, atm.getName());
                 cv.put(COLUMN_ATM_COUNTRY, atm.getCountry());
-                cv.put(COLUMN_ATM_CITY_ID, atm.getCityId());
                 cv.put(COLUMN_ATM_CITY, atm.getCity());
                 cv.put(COLUMN_ATM_ADDRESS, atm.getAddress());
                 cv.put(COLUMN_ATM_WORKTIME, atm.getWorktime());
@@ -146,10 +149,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Method for getting all ATMs
      *
-     * @return
+     * @return ArrayList
      */
     public ArrayList<Atm> getAllAtms() {
-        return getAtmsArray("");
+        ArrayList<Atm> atms = new ArrayList<>();
+        try {
+            atms = getAtmsArray("");
+        } catch (SQLException se) {
+            Log.e(Utils.TAG_ERROR_LOG, "getAllAtms(): " + se.toString());
+        }
+        return atms;
     }
 
     /**
@@ -159,7 +168,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @return ArrayList<Atm>
      */
     public ArrayList<Atm> getSearchAtm(String searchString){
-        return getAtmsArray(searchString);
+        ArrayList<Atm> atms = new ArrayList<>();
+        try {
+             atms = getAtmsArray(searchString);
+        } catch (SQLException se) {
+            Log.e(Utils.TAG_ERROR_LOG, "getSearchAtm(): " + se.toString());
+        }
+        return atms;
     }
 
     /**
@@ -168,7 +183,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @param searchString - query string
      * @return ArrayList<Atm>
      */
-    private ArrayList<Atm> getAtmsArray(String searchString) {
+    private ArrayList<Atm> getAtmsArray(String searchString) throws SQLException{
         ArrayList<Atm> atms = new ArrayList<>();
         Atm atm;
         String address;
@@ -187,7 +202,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         atm.setBankName(getStringFieldValue(cursor, COLUMN_BANK_NAME));
                         atm.setName(getStringFieldValue(cursor, COLUMN_ATM_NAME));
                         atm.setCountry(getStringFieldValue(cursor, COLUMN_ATM_COUNTRY));
-                        atm.setCityId(getIntFieldValue(cursor, COLUMN_ATM_CITY_ID));
                         atm.setCity(getStringFieldValue(cursor, COLUMN_ATM_CITY));
                         atm.setAddress(getStringFieldValue(cursor, COLUMN_ATM_ADDRESS));
                         atm.setWorktime(getStringFieldValue(cursor, COLUMN_ATM_WORKTIME));
@@ -213,14 +227,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @return Cursor
      */
     private Cursor getAtmsCursor(String searchString) {
-
         //LOWER, UPPER DON`T WORKING WITH CIRILLIC AND "LIKE"
         return getReadableDatabase().query(
                 TABLE_ATMS,
                 null,
                 COLUMN_ATM_LATITUDE + " > 0 AND " +
                         COLUMN_ATM_LONGITUDE + " > 0",
-                        //(!searchString.equals("") ? " AND lower(" + COLUMN_ATM_ADDRESS + ") LIKE ?" : ""), //where
+                //(!searchString.equals("") ? " AND lower(" + COLUMN_ATM_ADDRESS + ") LIKE ?" : ""), //where
                 null,//(!searchString.equals("") ? new String[]{"%" + String.valueOf(searchString) + "%"} : null), //where args (DON`T WORKING WITH CASE-INSENSITIVE)
                 null, //group by
                 null, //having
@@ -237,17 +250,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     private String getStringFieldValue(Cursor cursor, String columnName) {
         return cursor.getString(cursor.getColumnIndexOrThrow(columnName));
-    }
-
-    /**
-     * Helper method for getting field value
-     *
-     * @param cursor     Cursor
-     * @param columnName String
-     * @return Integer
-     */
-    private int getIntFieldValue(Cursor cursor, String columnName) {
-        return cursor.getInt(cursor.getColumnIndexOrThrow(columnName));
     }
 
     /**

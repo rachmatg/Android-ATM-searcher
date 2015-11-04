@@ -325,18 +325,10 @@ public class AtmListFragment
 
     /**
      * Method for call update fragment  UI from Activity
-     * @param location
+     * @param location Location
      */
     public void updateFragmentUI(Location location) {
-
-        if (location == null) {
-            Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".updateFragmentUI: Current location IS NULL");
-            mCurrentLocationPoint = null;
-            return;
-        } else {
-            Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".updateFragmentUI: Current location: lat " + location.getLatitude() + ", lon " + location.getLongitude());
-            mCurrentLocationPoint = new LocationPoint(location.getLatitude(), location.getLongitude());
-        }
+        mCurrentLocationPoint = (location != null) ? new LocationPoint(location.getLatitude(), location.getLongitude()) : null;
         updateListView();
     }
 

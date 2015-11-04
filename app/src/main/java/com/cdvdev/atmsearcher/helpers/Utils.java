@@ -102,6 +102,10 @@ public class Utils {
                 if (currentDateTime.getTime() - lastDateTime.getTime() < UPDATE_PERIOD) {
                     b = false;
                 }
+                //if ATMs list is empty in database (e.g. removed database)
+                if (DatabaseHelper.getInstance(activity).getAllAtms().size() == 0){
+                    b =true;
+                }
 
             } catch (ParseException e) {
                 Log.e(Utils.TAG_ERROR_LOG, e.getMessage());
