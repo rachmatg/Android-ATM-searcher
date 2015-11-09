@@ -20,7 +20,7 @@ public class FragmentsHelper {
 
         Fragment fragment = fm.findFragmentById(R.id.main_container);
 
-        if (fragment == null) {
+    //    if (fragment == null) {
             FragmentTransaction ft = fm.beginTransaction();
             ft.replace(R.id.main_container, newFragment)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -30,7 +30,7 @@ public class FragmentsHelper {
             }
 
             ft.commit();
-        }
+      //  }
 
     }
 

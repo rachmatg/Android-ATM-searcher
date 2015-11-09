@@ -9,18 +9,27 @@
         android:id="@+id/splash_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_splach_144dp"
+        android:src="@drawable/ic_splash_96dp"
         android:layout_centerInParent="true"
         />
 
     <TextView
+        android:layout_below="@+id/splash_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/message_splash"
-        android:layout_below="@+id/splash_logo"
         android:layout_centerInParent="true"
-        android:textSize="@dimen/text_primary_size"
+        android:gravity="center"
+        android:text="@string/message_splash"
         android:textColor="@color/text_secondary"
+        android:textSize="@dimen/text_primary_size"
         />
+
+    <TextView
+        android:id="@+id/text_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_alignParentBottom="true"
+        android:textColor="@color/text_secondary"/>
 
 </RelativeLayout>

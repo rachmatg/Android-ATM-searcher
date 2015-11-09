@@ -9,10 +9,12 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -105,6 +107,12 @@ public class AtmListFragment
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mFragmentListener.onChangeAppBarTitle(R.string.app_name);
+        return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState !=null) {
@@ -120,7 +128,6 @@ public class AtmListFragment
     @Override
     public void onResume() {
         super.onResume();
-        mFragmentListener.onChangeAppBarTitle(R.string.app_name);
 
         if (mSearchView != null && !mSaveSearchQueryString.equals("")) {
             mSearchView.setIconified(false);
@@ -131,20 +138,17 @@ public class AtmListFragment
 
         //show FAB when list is not empty
         showFab(mAtmArrayList.size() > 0);
-
         onShowHideProgressBar(mFragmentListener.onGetUpdateProgress());
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        showFab(false);
-    }
-
-    @Override
     public void onDestroyView() {
-        mSaveSearchQueryString = mSearchView.getQuery().toString();
-        closeSearchView();
+        if (mSearchView != null) {
+            mSaveSearchQueryString = mSearchView.getQuery().toString();
+            closeSearchView();
+        }
+        //hide FAB
+        showFab(false);
         super.onDestroyView();
     }
 
@@ -222,7 +226,6 @@ public class AtmListFragment
             mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
                 @Override
                 public boolean onClose() {
-                    Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onClose search view");
                     //query all ATM`s list
                     mSearchQueryString = "";
                     mFragmentListener.onSetHomeAsUpEnabled(false);
@@ -307,8 +310,7 @@ public class AtmListFragment
         mAtmArrayList.clear();
         mAtmArrayList.addAll(getAtmArrayList());
         mAdapter.notifyDataSetChanged();
-        //show FAB if list is not empty
-        showFab(mAtmArrayList.size() > 0);
+        //Don`t call showFab() here, because SeacrhView will be close on back press and call updateListView()
     }
 
     /**
@@ -330,6 +332,8 @@ public class AtmListFragment
     public void updateFragmentUI(Location location) {
         mCurrentLocationPoint = (location != null) ? new LocationPoint(location.getLatitude(), location.getLongitude()) : null;
         updateListView();
+        //show FAB when list is not empty
+         showFab(mAtmArrayList.size() > 0);
     }
 
     //--- PROGRESS CALLBACK
@@ -352,7 +356,6 @@ public class AtmListFragment
                     }
                 }
         );
-        Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onShowHideProgressBar() : " + (isShow ? "show" : "hide"));
     }
 
     //--- FAB CALLBACK

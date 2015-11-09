@@ -17,12 +17,13 @@
     <string name="message_update_reset">Обновление прервано</string>
     <string name="message_update_waiting">Подождите окончания обновления</string>
     <string name="message_search_no_items">Ничего не найдено</string>
-    <string name="message_need_on_gps">Для более точного поиска ближайшего банкомата включите определение местоположения по GPS</string>
+    <string name="message_need_on_gps">Для более точного поиска включите определение местоположения по GPS</string>
     <string name="message_need_on_location">Для поиска ближайшего банкомата включите определение местоположения</string>
-    <string name="label_kilometers">км</string>
     <string name="message_splash">Ваш помощник в поиске банкомата</string>
     <string name="message_about_app">С помощью данного приложения Вы можете в считанные секунды найти ближайший банкомат. Используется Ваше текущее местоположение по координатам сети оператора либо GPS приемника.</string>
 
+    <string name="label_kilometers">км</string>
+    <string name="label_app_version">Version</string>
     <!-- icons -->
     <string name="ic_description_place">Показать на карте</string>
     <string name="ic_description_info">Показать дополнительную информацию</string>

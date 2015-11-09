@@ -70,7 +70,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onUpgrade()");
         dropTables(db);
         onCreate(db);
     }
@@ -137,8 +136,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
 
             db.close();
-
-            Log.d(Utils.TAG_DEBUG_LOG, "end insert/update");
 
         } catch (Exception e) {
             Log.e("ERROR", e.getMessage());

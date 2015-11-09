@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -270,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements
      * Helper method for updating ATM`s list
      * @param location -Location
      */
-    private void updateIU(Location location) {
+    private void updateUI(Location location) {
        if (mFm.getFragments() == null) {
             return;
         }
@@ -339,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements
             //get last location
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mCurrentLocation != null) {
-                updateIU(mCurrentLocation);
+                updateUI(mCurrentLocation);
             }
         }
 
@@ -392,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements
     public void onLocationChanged(Location location) {
         //method called every time, even when location don`t changed. WTF??
         mCurrentLocation = location;
-        updateIU(mCurrentLocation);
+        updateUI(mCurrentLocation);
     }
 
     @Override
@@ -424,10 +425,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onErrorResponse(VolleyError volleyError) {
-        Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onErrorResponse: ОШИБКА ОБНОВЛЕНИЯ");
         Toast.makeText(this, getResources().getString(R.string.message_update_failed), Toast.LENGTH_SHORT).show();
         Log.e("ERROR", volleyError.toString());
-        updateIU(mCurrentLocation);
+        updateUI(mCurrentLocation);
         hideProgress(true);
     }
 
@@ -445,10 +445,10 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoaderReset(Loader loader) {
-       Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onLoaderReset: ОБНОВЛЕНИЕ ПРЕРВАНО");
+      // Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onLoaderReset: ОБНОВЛЕНИЕ ПРЕРВАНО");
        switch (loader.getId()) {
            case UPDATE_DB_LOADER_ID:
-               updateIU(mCurrentLocation);
+               updateUI(mCurrentLocation);
                hideProgress(true);
                Toast.makeText(this, getResources().getString(R.string.message_update_reset), Toast.LENGTH_SHORT).show();
                break;
@@ -457,10 +457,10 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(Loader loader, Object data) {
-       Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onLoadFinished: ОБНОВЛЕНИЕ ЗАВЕРШЕНО");
+      // Log.d(Utils.TAG_DEBUG_LOG, getClass().getSimpleName() + ".onLoadFinished: ОБНОВЛЕНИЕ ЗАВЕРШЕНО");
        switch (loader.getId()) {
            case UPDATE_DB_LOADER_ID:
-               updateIU(mCurrentLocation);
+               updateUI(mCurrentLocation);
                hideProgress(true);
                Toast.makeText(this, getResources().getString(R.string.message_update_success), Toast.LENGTH_SHORT).show();
                getSupportLoaderManager().destroyLoader(UPDATE_DB_LOADER_ID);
@@ -529,27 +529,84 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onShowFab(final int srcResId) {
+        if (mFab == null) {
+            return;
+        }
+
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (mFab == null) {
+                float fabHeight = mFab.getHeight();
+                float fabMargin = mFab.getResources().getDimension(R.dimen.fab_margin);
+
+                //if FAB been showed earlier
+                if (mFab.getTranslationY() == 0) {
                     return;
                 }
+
+                mFab.setTranslationY(fabHeight + fabMargin); //from
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     mFab.setImageDrawable(getApplicationContext().getResources().getDrawable(srcResId, getApplicationContext().getTheme()));
                 } else {
                     mFab.setImageDrawable(getApplicationContext().getResources().getDrawable(srcResId));
                 }
-                mFab.show();
+
+                //mFab.show();
+                mFab
+                        .animate()
+                        .translationY(0)
+                        .setInterpolator(new DecelerateInterpolator(2)) /*to*/
+                        .start();
+
             }
-        }, 500);
+        }, 200);
+
     }
 
     @Override
     public void onHideFab() {
+
          if (mFab == null) {
              return;
          }
-       mFab.hide();
+
+        mHandler.postDelayed(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        float fabHeight = mFab.getHeight();
+                        float fabMargin = mFab.getResources().getDimension(R.dimen.fab_margin);
+
+                        if (mFab.getTranslationY() == fabHeight + fabMargin) {
+                            return;
+                        }
+                        mFab.setTranslationY(0); //from
+                        mFab
+                                .animate()
+                                .translationY(fabHeight + fabMargin) /*to*/
+                                .setInterpolator(new DecelerateInterpolator(2))
+                                .start();
+                    }
+                }, 100
+        );
     }
+
+    /**
+     * Callback method for activity result from ErrorFragment
+     */
+    @Override
+    public void onRepeatConnect() {
+
+        if (NetworkHelper.isDeviceOnline(getApplicationContext())) {
+            mGoogleApiClient = initGoogleApiClient();
+            mLocationRequest = initLocationRequest();
+            if (mGoogleApiClient != null) {
+                mGoogleApiClient.connect();
+                checkLocationSettings();
+            }
+        }
+
+    }
+
 }

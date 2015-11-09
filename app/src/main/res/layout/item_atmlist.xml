@@ -10,6 +10,7 @@
         style="@style/AtmListItem.IconLayout">
 
         <ImageView
+            android:id="@+id/ic_item_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/ic_description_place"
@@ -23,11 +24,10 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="72dp"
         android:layout_marginStart="72dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp"
         android:paddingTop="16dp"
         android:paddingBottom="20dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_toLeftOf="@+id/layout_distance">
 
         <TextView
             android:id="@+id/atm_address"
@@ -37,18 +37,50 @@
             />
 
         <TextView
-            android:id="@+id/bank_name"
+            android:id="@+id/atm_city"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/AtmListItem.TextSecondary"
             />
 
         <TextView
-            android:id="@+id/atm_distance"
+            android:id="@+id/bank_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/AtmListItem.TextSecondary"
             />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingTop="16dp"
+        android:paddingBottom="20dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:gravity="end"
+        android:visibility="gone"
+        >
+
+        <TextView
+            android:id="@+id/atm_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/AtmListItem.TextSecondary"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_kilometers"
+            style="@style/AtmListItem.TextSecondary"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_navigation_grey600_18dp"/>
     </LinearLayout>
 
     <View

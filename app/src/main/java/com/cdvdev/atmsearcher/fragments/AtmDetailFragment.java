@@ -84,22 +84,22 @@ public class AtmDetailFragment extends Fragment implements FabListener {
             }
         }
 
+        mFragmentListener.onChangeAppBarTitle(R.string.title_detail_fragment);
+        mFragmentListener.onSetHomeAsUpEnabled(true);
+
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mFragmentListener.onChangeAppBarTitle(R.string.title_detail_fragment);
-        mFragmentListener.onSetHomeAsUpEnabled(true);
-
         //setup fab
         mFragmentListener.onShowFab(R.drawable.ic_place_white_24dp);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         mFragmentListener.onHideFab();
     }
 

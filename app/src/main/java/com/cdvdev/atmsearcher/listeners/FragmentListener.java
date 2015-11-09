@@ -18,4 +18,5 @@ public interface FragmentListener {
     void onRefreshData();
     void onShowFab(int srcResId);
     void onHideFab();
+    void onRepeatConnect();
 }

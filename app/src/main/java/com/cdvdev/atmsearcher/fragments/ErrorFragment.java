@@ -1,7 +1,6 @@
 package com.cdvdev.atmsearcher.fragments;
 
 import android.app.Activity;
-import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cdvdev.atmsearcher.App;
 import com.cdvdev.atmsearcher.R;
@@ -25,6 +23,7 @@ public class ErrorFragment extends Fragment {
     private static final String KEY_ERROR_TEXT = "atmsearcher.errorfragment.error_text";
     private static final String KEY_ERROR_ACTION = "atmsearcher.errorfragment.error_action";
     private static final String KEY_ACTION_BUTTON_TEXT = "atmsearcher.errorfragment.action_button_text";
+    private static final int FIX_CONNECTION_REQUEST_CODE = 0;
     private FragmentListener mFragmentListener;
 
     public static Fragment newInstance(String errorText, CustomIntent actionIntent, String buttonText){
@@ -102,7 +101,7 @@ public class ErrorFragment extends Fragment {
                actionButton.setOnClickListener(new View.OnClickListener(){
                    @Override
                    public void onClick(View view) {
-                       startActivity(intent);
+                       startActivityForResult(intent, FIX_CONNECTION_REQUEST_CODE);
                    }
                });
                actionButton.setText(buttonText);
@@ -115,13 +114,24 @@ public class ErrorFragment extends Fragment {
 
     @Override
     public void onResume() {
-        super.onResume();
         mFragmentListener.onHideFab();
+        super.onResume();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mFragmentListener = null;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case FIX_CONNECTION_REQUEST_CODE:
+                mFragmentListener.onRepeatConnect();
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 }

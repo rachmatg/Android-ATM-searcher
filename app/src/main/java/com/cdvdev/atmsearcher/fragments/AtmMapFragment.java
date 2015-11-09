@@ -96,6 +96,9 @@ GoogleMap.OnMyLocationChangeListener{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mFragmentListener.onChangeAppBarTitle(R.string.title_map_fragment);
+        mFragmentListener.onSetHomeAsUpEnabled(true);
+
         View view = inflater.inflate(R.layout.fragment_atm_map, container, false);
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
@@ -104,13 +107,6 @@ GoogleMap.OnMyLocationChangeListener{
         return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        mFragmentListener.onChangeAppBarTitle(R.string.title_map_fragment);
-        mFragmentListener.onSetHomeAsUpEnabled(true);
-        mFragmentListener.onHideFab();
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -50,14 +50,24 @@ public class AtmListAdapter extends ArrayAdapter<Atm> {
 
         TextView atmAddress = (TextView) convertView.findViewById(R.id.atm_address);
         if (atmAddress != null) {
-            atmAddress.setText(atm.getAddress() + ", " + atm.getCity());
+            atmAddress.setText(atm.getAddress());
+        }
+
+        TextView atmCity = (TextView) convertView.findViewById(R.id.atm_city);
+        if (atmCity != null) {
+            atmCity.setText(atm.getCity());
         }
 
         TextView atmDistance = (TextView) convertView.findViewById(R.id.atm_distance);
         if (atmDistance != null) {
             double distance = new BigDecimal(atm.getDistance()).setScale(3, RoundingMode.UP).doubleValue();
-            atmDistance.setText( (distance > 0 ? Double.toString(atm.getDistance()) : "--.--") + " " + mContext.getResources().getString(R.string.label_kilometers));
+            if (distance > 0) {
+                String distanceText =  Double.toString(atm.getDistance());
+                atmDistance.setText(distanceText);
+                convertView.findViewById(R.id.layout_distance).setVisibility(View.VISIBLE);
+            }
         }
+
 
         FrameLayout showPlace = (FrameLayout) convertView.findViewById(R.id.ic_place_container);
         if (showPlace != null) {
