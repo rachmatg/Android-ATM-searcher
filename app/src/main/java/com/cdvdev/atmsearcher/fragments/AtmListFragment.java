@@ -272,9 +272,14 @@ public class AtmListFragment
             case android.R.id.home:
                 closeSearchView();
                 return true;
+            //about app
+            case R.id.action_about_app:
+                return mFragmentListener.onOptionsMenuItemSelected(id);
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
+
     }
 
     @Override

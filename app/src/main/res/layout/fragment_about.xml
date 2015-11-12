@@ -11,18 +11,46 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/message_about_app"/>
+        android:text="@string/message_about_app"
+        android:textSize="@dimen/text_primary_size"
+        android:textColor="@color/text_primary"
+        />
 
-
-    <LinearLayout
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/layout_contacts"
+        android:layout_centerInParent="true"
+        android:textSize="@dimen/text_secondary_size"
+        android:textColor="@color/text_secondary"
+        android:text="@string/label_contact_developer"
+        />
+
+    <LinearLayout
+        android:id="@+id/layout_contacts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_centerInParent="true"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true">
-        <TextView
+        >
+
+        <ImageView
+            android:id="@+id/ic_contact_google"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Разработчик Dmitriy Chernysh"/>
+            android:padding="8dp"
+            android:src="@drawable/ic_contact_google_active_48dp"
+            android:contentDescription="@string/image_contact_google"/>
+
+        <ImageView
+            android:id="@+id/ic_contact_linkedin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:src="@drawable/ic_contact_linkedin_active_48dp"
+            android:contentDescription="@string/image_contact_linkedin"/>
+
     </LinearLayout>
 
 </RelativeLayout>

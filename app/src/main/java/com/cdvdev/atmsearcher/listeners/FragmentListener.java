@@ -19,4 +19,5 @@ public interface FragmentListener {
     void onShowFab(int srcResId);
     void onHideFab();
     void onRepeatConnect();
+    boolean onOptionsMenuItemSelected(int menuId);
 }

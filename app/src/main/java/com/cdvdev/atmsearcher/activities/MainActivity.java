@@ -8,7 +8,6 @@ import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -28,6 +27,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.cdvdev.atmsearcher.R;
+import com.cdvdev.atmsearcher.fragments.AppInfoFragment;
 import com.cdvdev.atmsearcher.fragments.AtmDetailFragment;
 import com.cdvdev.atmsearcher.fragments.AtmListFragment;
 import com.cdvdev.atmsearcher.fragments.ErrorFragment;
@@ -135,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements
              mGoogleApiClient.connect();
              checkLocationSettings();
         }
+        //reset saved visibility fragment
+       // FragmentsHelper.setCurrentVisibleFragment(null);
     }
 
     @Override
@@ -169,6 +171,15 @@ public class MainActivity extends AppCompatActivity implements
         if (mRequestQueue != null) {
             mRequestQueue.cancelAll(REQUESTS_VOLLEY_TAG);
         }
+        //save visibility fragment
+        FragmentsHelper.saveVisibleFragment(mFm);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //reset saved visibility fragment
+        FragmentsHelper.resetSavedVisibleFragment();
     }
 
     @Override
@@ -344,8 +355,7 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
 
-        Fragment newFragment = AtmListFragment.newInstance();
-        FragmentsHelper.createFragment(mFm, newFragment, false);
+        FragmentsHelper.createFragment(mFm, AtmListFragment.newInstance(), false);
         startLocationUpdate();
         //start first update only if last update be more than certain time
         if (Utils.isNeedToUpdate(this)) {
@@ -490,12 +500,8 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onAtmListItemSelected(Atm atm) {
-        Fragment newFragment = AtmDetailFragment.newInstance(atm);
-        FragmentTransaction ft = mFm.beginTransaction();
-        ft.replace(R.id.main_container, newFragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack(null);
-        ft.commit();
+        Fragment newFragment =  AtmDetailFragment.newInstance(atm);
+        FragmentsHelper.createFragment(mFm, newFragment, true);
     }
 
     @Override
@@ -510,11 +516,8 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onViewAtmOnMap(Atm atm) {
-        FragmentTransaction ft = mFm.beginTransaction();
-        ft.replace(R.id.main_container, AtmMapFragment.newInstance(atm))
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack(null);
-        ft.commit();
+        Fragment newFragment = AtmMapFragment.newInstance(atm);
+        FragmentsHelper.createFragment(mFm, newFragment, true);
     }
 
     @Override
@@ -590,6 +593,17 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 }, 100
         );
+    }
+
+    @Override
+    public boolean onOptionsMenuItemSelected(int menuId) {
+        switch (menuId) {
+            case R.id.action_about_app:
+                FragmentsHelper.createFragment(mFm, AppInfoFragment.newInstance(), true);
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
