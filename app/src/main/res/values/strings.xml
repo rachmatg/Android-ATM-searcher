@@ -9,6 +9,7 @@
     <string name="action_search_hint">Название улицы</string>
     <string name="action_about_app">О приложении</string>
     <string name="action_share_app_link">Рассказать друзьям</string>
+    <string name="action_share_atm_detail">Поделиться расположением ATM</string>
 
     <string name="message_network_off">Включите WiFi или мобильный интернет</string>
     <string name="message_error_undefined">Извините, произошла неопределенная ошибка&#8230;</string>

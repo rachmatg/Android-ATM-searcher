@@ -1,10 +1,15 @@
 package com.cdvdev.atmsearcher.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -107,6 +112,25 @@ public class AtmDetailFragment extends Fragment implements FabListener {
     public void onDestroy() {
         super.onDestroy();
         mFragmentListener = null;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_atm_detail, menu);
+
+        MenuItem shareItem = menu.findItem(R.id.action_share_atm);
+        String shareText = "ATM: " +
+                                       mAtm.getAddress() + ", " +
+                                       mAtm.getCity() + ", " +
+                                       mAtm.getBankName();
+
+        ShareActionProvider shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/*");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+        shareActionProvider.setShareIntent(shareIntent);
+
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
