@@ -13,12 +13,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.cdvdev.atmsearcher.App;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.helpers.Utils;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
+import com.google.android.gms.analytics.HitBuilders;
 
 public class AppInfoFragment extends  Fragment implements View.OnClickListener{
 
@@ -53,6 +54,15 @@ public class AppInfoFragment extends  Fragment implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         setHasOptionsMenu(true);
+
+        //analytics
+        App.sTracker.setScreenName("Fragment AppInfoFragment");
+        App.sTracker.send(
+                new HitBuilders.EventBuilder()
+                        .setCategory(App.sGACategoryUX)
+                        .setAction("View App info")
+                        .build()
+        );
     }
 
     @Nullable
