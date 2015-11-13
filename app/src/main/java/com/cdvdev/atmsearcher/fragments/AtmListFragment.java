@@ -1,6 +1,7 @@
 package com.cdvdev.atmsearcher.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -190,13 +190,13 @@ public class AtmListFragment
         return atms;
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_atms_list, menu);
-
-        MenuItem searchItem = menu.findItem(R.id.action_search);
-        if (searchItem != null) {
-            mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+    /**
+     * Method for setup SearchView
+     * @param menuItem - menu item
+     */
+    private void setupSearchView(MenuItem menuItem) {
+        if (menuItem != null) {
+            mSearchView = (SearchView) MenuItemCompat.getActionView(menuItem);
             //set hint to EditText
             mSearchView.setQueryHint(getActivity().getResources().getString(R.string.action_search_hint));
 
@@ -248,8 +248,16 @@ public class AtmListFragment
                 mSearchView.setIconified(false);
                 mSearchView.setQuery(mSaveSearchQueryString, true);
             }
-
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_atms_list, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        setupSearchView(searchItem);
+
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -275,6 +283,14 @@ public class AtmListFragment
             //about app
             case R.id.action_about_app:
                 return mFragmentListener.onOptionsMenuItemSelected(id);
+            //share app link
+            case R.id.action_share_app_link:
+                String shareText = getActivity().getResources().getString(R.string.message_share_app_link);
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("text/*");
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+                startActivity(Intent.createChooser(sharingIntent, getActivity().getResources().getString(R.string.label_chooser_share_app_link)));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

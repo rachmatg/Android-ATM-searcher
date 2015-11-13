@@ -4,6 +4,5 @@
     <item android:id="@+id/action_share_atm"
           android:title="@string/action_share_atm_detail"
           android:icon="@drawable/ic_share_white_24dp"
-          app:showAsAction="always"
-          app:actionProviderClass="android.support.v7.widget.ShareActionProvider" />
+          app:showAsAction="always" />
 </menu>

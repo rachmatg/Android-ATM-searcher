@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -117,19 +115,6 @@ public class AtmDetailFragment extends Fragment implements FabListener {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_atm_detail, menu);
-
-        MenuItem shareItem = menu.findItem(R.id.action_share_atm);
-        String shareText = "ATM: " +
-                                       mAtm.getAddress() + ", " +
-                                       mAtm.getCity() + ", " +
-                                       mAtm.getBankName();
-
-        ShareActionProvider shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("text/*");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
-        shareActionProvider.setShareIntent(shareIntent);
-
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -138,6 +123,16 @@ public class AtmDetailFragment extends Fragment implements FabListener {
         switch (item.getItemId()) {
             case android.R.id.home:
                 getActivity().onBackPressed();
+                return true;
+            case R.id.action_share_atm:
+                String shareText = "ATM: " +
+                        mAtm.getAddress() + ", " +
+                        mAtm.getCity() + ", " +
+                        mAtm.getBankName();
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("text/*");
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+                startActivity(Intent.createChooser(sharingIntent, getActivity().getResources().getString(R.string.label_chooser_share_atm)));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

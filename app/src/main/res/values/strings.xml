@@ -26,10 +26,13 @@
     <string name="message_need_on_location">Для поиска ближайшего банкомата включите определение местоположения</string>
     <string name="message_splash">Ваш помощник в поиске банкомата</string>
     <string name="message_about_app">Приложение позволяет найти ближайший банкомат в любом месте где бы Вы не находились. Используется Ваше текущее местоположение по координатам сети оператора либо GPS приемника.</string>
+    <string name="message_share_app_link">Привет! Рекомендую приложение для поиска банкоматов http://play.google.com/store/apps/details?id=com.cdvdev.atmsearcher</string>
 
     <string name="label_kilometers">км</string>
     <string name="label_app_version">Version</string>
     <string name="label_contact_developer">Написать разработчику</string>
+    <string name="label_chooser_share_atm">Поделиться расположением</string>
+    <string name="label_chooser_share_app_link">Рекомендовать другу</string>
     <!-- icons -->
     <string name="ic_description_place">Показать на карте</string>
     <string name="ic_description_info">Показать дополнительную информацию</string>
