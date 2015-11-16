@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Пошук банкомату</string>
+    <string name="button_goto_map">На мапі</string>
+    <string name="button_settings">Налаштування</string>
+    <string name="button_text_install">Встановити</string>
+    <string name="button_text_repeat">Повторити</string>
+    <string name="button_text_update">Оновити</string>
+    <string name="ic_atm_address">Адреса банкомату</string>
+    <string name="ic_atm_worktime">Час роботи</string>
+    <string name="ic_bank_description">Найменування банку</string>
+    <string name="ic_description_info">Показати додаткову інформацію</string>
+    <string name="ic_description_place">Показати на мапі</string>
+    <string name="image_contact_google">Написати в Google+</string>
+    <string name="image_contact_linkedin">Написати в Linkedin</string>
+    <string name="label_app_version">Версія</string>
+    <string name="label_chooser_share_app_link">Рекомендувати другу</string>
+    <string name="label_chooser_share_atm">Поділітися розташуванням</string>
+    <string name="label_contact_developer">Написати розробнику</string>
+    <string name="label_kilometers">км</string>
+    <string name="message_about_app">Додаток дозволяє знайти найближчий банкомат у будь-якому місці, де б Ви не знаходились. Використовується Ваше місцезнаходження за координатами мережі або GPS приймача.</string>
+    <string name="action_about_app">Про додадок</string>
+    <string name="action_share_atm_detail">Поділитися розташуванням</string>
+    <string name="action_search">Пошук</string>
+    <string name="action_search_hint">Назва вулиці</string>
+    <string name="action_share_app_link">Розповісти друзям</string>
+    <string name="message_error_google_services_default">Помилка сервісів гугл</string>
+    <string name="message_error_google_services_disabled">Для роботи з додатком необхідно увімкнути сервіси Google Play</string>
+    <string name="message_error_google_services_missing">Для роботи з додатком потрібні сервіси Google Play, які не встановлені на Вашому телефоні</string>
+    <string name="message_error_google_services_update_required">Для роботи з додатком необхідно оновити сервіси Google Play</string>
+    <string name="message_error_undefined">Вибачте, сталася неочікувана помилка</string>
+    <string name="message_need_on_gps">Для більш точного пошуку увімкніть визначення місцезнаходження за GPS</string>
+    <string name="message_need_on_location">Для пошуку найближчого банкомату увімкніть визначення місцезнаходження за GPS</string>
+    <string name="message_network_off">Увімкніть WiFi або мобільний інтернет</string>
+    <string name="message_search_no_items">Нічого не знайдено</string>
+    <string name="message_share_app_link">Привіт! Рекомендую додаток для пошуку банкоматів https://goo.gl/l0Ccse</string>
+    <string name="message_splash">Ваш помічник у пошуку банкомату</string>
+    <string name="message_update_failed">Помилка при оновленні</string>
+    <string name="message_update_reset">Оновлення перервано</string>
+    <string name="message_update_success">Оновлення завершено</string>
+    <string name="message_update_waiting">Почекайте закінчення оновлення</string>
+    <string name="title_about_app">Про додаток</string>
+    <string name="title_detail_fragment">Банкомат</string>
+    <string name="title_map_fragment">Навігація</string>
+</resources>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Search ATM</string>
+    <string name="button_goto_map">On map</string>
+    <string name="button_settings">Settings</string>
+    <string name="action_about_app">About app</string>
+    <string name="action_search">Search</string>
+    <string name="action_search_hint">Street name</string>
+    <string name="action_share_app_link">Share to friend</string>
+    <string name="action_share_atm_detail">Share ATM location</string>
+    <string name="button_text_install">Install</string>
+    <string name="button_text_repeat">Repeat</string>
+    <string name="button_text_update">Update</string>
+    <string name="ic_atm_address">ATM address</string>
+    <string name="ic_atm_worktime">Work time</string>
+    <string name="ic_bank_description">Bank name</string>
+    <string name="ic_description_place">Show on map</string>
+    <string name="ic_description_info">Show additional info</string>
+    <string name="image_contact_google">Write in Google+</string>
+    <string name="image_contact_linkedin">Write in Linkedin</string>
+    <string name="label_app_version">Version</string>
+    <string name="label_chooser_share_app_link">Recommend to a friend</string>
+    <string name="label_chooser_share_atm">Share location</string>
+    <string name="label_contact_developer">Write to a developer</string>
+    <string name="label_kilometers">km</string>
+    <string name="message_about_app">The app allows you to find the nearest ATM anywhere where ever You are. Use Your current location coordinates of the operator`s network or a GPS receiver.</string>
+    <string name="message_error_google_services_default">Google Play services error</string>
+    <string name="message_error_google_services_disabled">To work with the application you must include Google Play services</string>
+    <string name="message_error_google_services_missing">For work with application requires Google Play services, which is not installed on your phone</string>
+    <string name="message_error_google_services_update_required">For work with application needs to update Google Play services</string>
+    <string name="message_error_undefined">Sorry, there was an undefined error&#8230;</string>
+    <string name="message_need_on_gps">For better searching, turn on your GPS location</string>
+    <string name="message_need_on_location">Turn on location detection for searching the nearest ATM</string>
+    <string name="message_network_off">Turn on WiFi on mobile internet</string>
+    <string name="message_search_no_items">Nothing found</string>
+    <string name="message_share_app_link">Hi! I recommend the app for searching nearest ATM https://goo.gl/l0Ccse</string>
+    <string name="message_splash">Your helper for searching nearest ATM</string>
+    <string name="message_update_failed">Error while updating</string>
+    <string name="message_update_reset"> Update interrupted</string>
+    <string name="message_update_success">Update complete</string>
+    <string name="message_update_waiting">Wait while updating will be finish</string>
+    <string name="title_about_app">About app</string>
+    <string name="title_detail_fragment">ATM</string>
+    <string name="title_map_fragment">Navigation</string>
+</resources>
