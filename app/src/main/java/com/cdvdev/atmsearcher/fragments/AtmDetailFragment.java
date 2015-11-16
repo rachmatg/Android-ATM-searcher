@@ -1,6 +1,7 @@
 package com.cdvdev.atmsearcher.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -38,11 +39,15 @@ public class AtmDetailFragment extends Fragment implements FabListener {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Activity activity = null;
 
         try {
-            mFragmentListener = (FragmentListener) activity;
+            if (context instanceof Activity) {
+                activity = (Activity) context;
+                mFragmentListener = (FragmentListener) activity;
+            }
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must be implement FragmentListener");
         }

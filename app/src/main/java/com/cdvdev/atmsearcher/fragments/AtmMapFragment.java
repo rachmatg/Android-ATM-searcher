@@ -2,6 +2,7 @@ package com.cdvdev.atmsearcher.fragments;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -15,7 +16,6 @@ import android.widget.Toast;
 import com.cdvdev.atmsearcher.App;
 import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.helpers.DatabaseHelper;
-import com.cdvdev.atmsearcher.helpers.Utils;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.models.Atm;
 import com.google.android.gms.analytics.HitBuilders;
@@ -58,10 +58,15 @@ GoogleMap.OnMyLocationChangeListener{
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Activity activity = null;
+
         try {
-            mFragmentListener = (FragmentListener) activity;
+            if (context instanceof Activity) {
+                activity = (Activity) context;
+                mFragmentListener = (FragmentListener) activity;
+            }
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must be implement FragmentListener");
         }
