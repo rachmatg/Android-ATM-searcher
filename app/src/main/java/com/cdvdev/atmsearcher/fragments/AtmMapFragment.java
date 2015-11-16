@@ -6,11 +6,11 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.cdvdev.atmsearcher.App;
 import com.cdvdev.atmsearcher.R;
@@ -139,7 +139,6 @@ GoogleMap.OnMyLocationChangeListener{
         mGoogleMap.setOnMyLocationChangeListener(this);
         mGoogleMap.setOnCameraChangeListener(this);
 
-
         if (mAtmArrayList != null && mAtmArrayList.size() > 0) {
             mIsNeedMovedCameraToLocation = (mSelectedAtm == null);
 
@@ -204,8 +203,13 @@ GoogleMap.OnMyLocationChangeListener{
 
     @Override
     public boolean onMyLocationButtonClick() {
-        //need to moved camera to user location
-        mIsNeedMovedCameraToLocation = true;
+        Location location = mGoogleMap.getMyLocation();
+        if (location != null) {
+            //need to moved camera to user location
+            mIsNeedMovedCameraToLocation = true;
+        } else {
+            Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.message_location_not_desined), Toast.LENGTH_SHORT).show();
+        }
         return false;
     }
 

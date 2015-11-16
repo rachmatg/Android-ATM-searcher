@@ -42,4 +42,5 @@
     <string name="title_about_app">About app</string>
     <string name="title_detail_fragment">ATM</string>
     <string name="title_map_fragment">Navigation</string>
+    <string name="message_location_not_desined">Location is not defined</string>
 </resources>

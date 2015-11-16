@@ -27,7 +27,8 @@
     <string name="message_splash">Ваш помощник в поиске банкомата</string>
     <string name="message_about_app">Приложение позволяет найти ближайший банкомат в любом месте где бы Вы не находились. Используется Ваше текущее местоположение по координатам сети оператора либо GPS приемника.</string>
     <string name="message_share_app_link">Привет! Рекомендую приложение для поиска банкоматов https://goo.gl/l0Ccse</string>
-
+    <string name="message_location_not_desined">Местоположение не определено</string>
+    
     <string name="label_kilometers">км</string>
     <string name="label_app_version">Версия</string>
     <string name="label_contact_developer">Написать разработчику</string>

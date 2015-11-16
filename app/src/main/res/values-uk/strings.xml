@@ -42,4 +42,5 @@
     <string name="title_about_app">Про додаток</string>
     <string name="title_detail_fragment">Банкомат</string>
     <string name="title_map_fragment">Навігація</string>
+    <string name="message_location_not_desined">Місцезнаходження не визначено</string>
 </resources>
