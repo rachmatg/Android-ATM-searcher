@@ -1,8 +1,11 @@
 package com.cdvdev.atmsearcher;
 
 import android.app.Application;
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
+import io.fabric.sdk.android.Fabric;
 
 public class App extends Application {
     //period for sending data to google analytics
@@ -18,6 +21,15 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //disable Crashlytics for debug version
+        Crashlytics crashlytics = new Crashlytics.Builder()
+                .core(
+                        new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build()
+                )
+                .build();
+        //init Crashlytics
+        Fabric.with(this, crashlytics);
 
         sAnalytics = GoogleAnalytics.getInstance(this);
         sAnalytics.setLocalDispatchPeriod(GA_DISPATCH_PERIOD);
