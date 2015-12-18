@@ -52,4 +52,6 @@
     <string name="image_contact_google">Написать в Google+</string>
     <string name="image_contact_linkedin">Написать в Linkedin</string>
 
+    <!-- admob -->
+    <string name="admob_banner_id" translatable="false">ca-app-pub-5648227204874443/9373607012</string>
 </resources>

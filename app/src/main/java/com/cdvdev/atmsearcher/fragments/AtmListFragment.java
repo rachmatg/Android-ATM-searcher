@@ -47,7 +47,6 @@ public class AtmListFragment
     private final static int FAB_ICON = R.drawable.ic_map_white_24dp;
 
     private ArrayList<Atm> mAtmArrayList;
-    private ArrayAdapter<Atm> mAdapter;
     private SearchView mSearchView;
     private String mSearchQueryString = "";
     private String mSaveSearchQueryString = "";
@@ -57,6 +56,12 @@ public class AtmListFragment
 
     public static Fragment newInstance() {
         return new AtmListFragment();
+    }
+
+    @Override
+    public ArrayAdapter<Atm> createAdapter() {
+        mAtmArrayList = getAtmArrayList();
+        return new AtmListAdapter(getActivity(), mAtmArrayList);
     }
 
     @Override
@@ -82,11 +87,6 @@ public class AtmListFragment
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mAtmArrayList = getAtmArrayList();
-
-        mAdapter = new AtmListAdapter(getActivity(), mAtmArrayList);
-        setListAdapter(mAdapter);
 
         //save fragment object
         setRetainInstance(true);
@@ -305,6 +305,12 @@ public class AtmListFragment
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
+        //if list have Header
+        position = position - l.getHeaderViewsCount();
+        if (position < 0) {
+            return;
+        }
+
         Atm atm = ((AtmListAdapter) getListAdapter()).getItem(position);
         mFragmentListener.onAtmListItemSelected(atm);
 

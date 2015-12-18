@@ -3,10 +3,8 @@ package com.cdvdev.atmsearcher.fragments;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +12,7 @@ import android.widget.ListView;
 
 import com.cdvdev.atmsearcher.R;
 
-public abstract class SwipeRefreshBaseFragment extends ListFragment {
+public abstract class SwipeRefreshBaseFragment extends BaseListFragmentWithAds {
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
