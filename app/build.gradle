@@ -30,8 +30,8 @@ android {
         applicationId "com.cdvdev.atmsearcher"
         minSdkVersion 14
         targetSdkVersion 23
-        versionName '1.0.3'
-        versionCode 9
+        versionName '1.0.4'
+        versionCode 10
     }
     buildTypes {
         debug {
