@@ -1,22 +1,25 @@
 package com.cdvdev.atmsearcher.activities;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.IntentSender;
 import android.location.Location;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -30,20 +33,20 @@ import com.cdvdev.atmsearcher.R;
 import com.cdvdev.atmsearcher.fragments.AppInfoFragment;
 import com.cdvdev.atmsearcher.fragments.AtmDetailFragment;
 import com.cdvdev.atmsearcher.fragments.AtmListFragment;
+import com.cdvdev.atmsearcher.fragments.AtmMapFragment;
 import com.cdvdev.atmsearcher.fragments.ErrorFragment;
 import com.cdvdev.atmsearcher.fragments.LocationAlertDialogFragment;
-import com.cdvdev.atmsearcher.fragments.AtmMapFragment;
 import com.cdvdev.atmsearcher.helpers.CustomIntent;
 import com.cdvdev.atmsearcher.helpers.FragmentsHelper;
 import com.cdvdev.atmsearcher.helpers.GoogleApiErrorsHelper;
 import com.cdvdev.atmsearcher.helpers.JsonParseHelper;
 import com.cdvdev.atmsearcher.helpers.NetworkHelper;
 import com.cdvdev.atmsearcher.helpers.Utils;
+import com.cdvdev.atmsearcher.listeners.BackPressedListener;
 import com.cdvdev.atmsearcher.listeners.CustomLocationListener;
 import com.cdvdev.atmsearcher.listeners.FabListener;
 import com.cdvdev.atmsearcher.listeners.FragmentListener;
 import com.cdvdev.atmsearcher.listeners.GoogleApiListener;
-import com.cdvdev.atmsearcher.listeners.BackPressedListener;
 import com.cdvdev.atmsearcher.listeners.ProgressListener;
 import com.cdvdev.atmsearcher.listeners.VolleyListener;
 import com.cdvdev.atmsearcher.loaders.DataBaseUpdateLoader;
@@ -300,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements
     private void doUpdateAtms() {
 
         if (isUpdating) {
-            Toast.makeText(this, getResources().getString(R.string.message_update_waiting), Toast.LENGTH_SHORT).show();
+            showSnackBarMessage(getResources().getString(R.string.message_update_waiting));
             return;
         }
 
@@ -340,6 +343,20 @@ public class MainActivity extends AppCompatActivity implements
                 ((ProgressListener) fragment).onShowHideProgressBar(!isHide);
             }
         }
+    }
+
+    /**
+     * Helper method for showing SnackBar messages
+     *
+     * @param text - Message text
+     */
+    private void showSnackBarMessage(String text){
+        CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
+        Snackbar.make(
+             coordinatorLayout,
+             text,
+             Snackbar.LENGTH_LONG
+        ).show();
     }
 
     //----- GOOGLE API CONNECTION CALLBACKS
@@ -435,7 +452,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onErrorResponse(VolleyError volleyError) {
-        Toast.makeText(this, getResources().getString(R.string.message_update_failed), Toast.LENGTH_SHORT).show();
+        showSnackBarMessage(getResources().getString(R.string.message_update_failed));
         Log.e("ERROR", volleyError.toString());
         updateUI(mCurrentLocation);
         hideProgress(true);
@@ -460,7 +477,7 @@ public class MainActivity extends AppCompatActivity implements
            case UPDATE_DB_LOADER_ID:
                updateUI(mCurrentLocation);
                hideProgress(true);
-               Toast.makeText(this, getResources().getString(R.string.message_update_reset), Toast.LENGTH_SHORT).show();
+               showSnackBarMessage(getResources().getString(R.string.message_update_reset));
                break;
        }
     }
@@ -472,7 +489,7 @@ public class MainActivity extends AppCompatActivity implements
            case UPDATE_DB_LOADER_ID:
                updateUI(mCurrentLocation);
                hideProgress(true);
-               Toast.makeText(this, getResources().getString(R.string.message_update_success), Toast.LENGTH_SHORT).show();
+               showSnackBarMessage(getResources().getString(R.string.message_update_success));
                getSupportLoaderManager().destroyLoader(UPDATE_DB_LOADER_ID);
                //save datetime of success update
                Utils.saveLastUpdateTime(this);
@@ -539,31 +556,23 @@ public class MainActivity extends AppCompatActivity implements
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                float fabHeight = mFab.getHeight();
-                float fabMargin = mFab.getResources().getDimension(R.dimen.fab_margin);
-
-                //if FAB been showed earlier
-                if (mFab.getTranslationY() == 0) {
-                    return;
+                if (mFab.getScaleX() != 1 & mFab.getScaleY() != 1) {
+                    AnimatorSet animatorSet = new AnimatorSet();
+                    animatorSet.playTogether(
+                            ObjectAnimator.ofFloat(mFab, "scaleX", 0, 1.0f).setDuration(200),
+                            ObjectAnimator.ofFloat(mFab, "scaleY", 0, 1.0f).setDuration(200)
+                    );
+                    animatorSet.start();
                 }
-
-                mFab.setTranslationY(fabHeight + fabMargin); //from
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     mFab.setImageDrawable(getApplicationContext().getResources().getDrawable(srcResId, getApplicationContext().getTheme()));
                 } else {
                     mFab.setImageDrawable(getApplicationContext().getResources().getDrawable(srcResId));
                 }
-
-                //mFab.show();
-                mFab
-                        .animate()
-                        .translationY(0)
-                        .setInterpolator(new DecelerateInterpolator(2)) /*to*/
-                        .start();
-
             }
         }, 200);
+
 
     }
 
@@ -578,18 +587,15 @@ public class MainActivity extends AppCompatActivity implements
                 new Runnable() {
                     @Override
                     public void run() {
-                        float fabHeight = mFab.getHeight();
-                        float fabMargin = mFab.getResources().getDimension(R.dimen.fab_margin);
-
-                        if (mFab.getTranslationY() == fabHeight + fabMargin) {
-                            return;
+                        if (mFab.getScaleX() == 1 && mFab.getScaleY() == 1) {
+                            //setup multiple
+                            AnimatorSet animatorSet = new AnimatorSet();
+                            animatorSet.playTogether(
+                                    ObjectAnimator.ofFloat(mFab, "scaleX", 1.0f, 0).setDuration(200),
+                                    ObjectAnimator.ofFloat(mFab, "scaleY", 1.0f, 0).setDuration(200)
+                            );
+                            animatorSet.start();
                         }
-                        mFab.setTranslationY(0); //from
-                        mFab
-                                .animate()
-                                .translationY(fabHeight + fabMargin) /*to*/
-                                .setInterpolator(new DecelerateInterpolator(2))
-                                .start();
                     }
                 }, 100
         );
